@@ -10,6 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
-        run: npm install -g elm elm-test
+        run: npm install -g elm elm-test elm-format
       - name: Run tests
         run: elm-test
+      - name: Check formatting of source files
+        run: elm-format ./src --validate
+      - name: Check formatting of test files
+        run: elm-format ./tests --validate
