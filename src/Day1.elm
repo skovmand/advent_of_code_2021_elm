@@ -1,4 +1,4 @@
-module Day1 exposing (main)
+module Day1 exposing (..)
 
 import Html
 
