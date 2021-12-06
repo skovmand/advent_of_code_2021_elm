@@ -1,0 +1,15 @@
+name: Santa CI
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: node:16
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install -g elm elm-test
+      - name: Run tests
+        run: elm-test
