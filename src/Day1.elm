@@ -16,7 +16,7 @@ main =
     Html.div [] (List.map answerLine calculations)
 
 
-answerLine : (String, Int) -> Html.Html msg
+answerLine : ( String, Int ) -> Html.Html msg
 answerLine ( title, result ) =
     Html.div [] [ Html.text title, Html.text (String.fromInt result), Html.text " increases" ]
 
