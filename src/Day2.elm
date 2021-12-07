@@ -1,16 +1,14 @@
 module Day2 exposing (..)
 
+-------------------------------------------------------------------------
+-- Part 1: What is the position of the boat after executing the commands?
+-------------------------------------------------------------------------
+
 
 type alias Position =
     { depth : Int
     , forward : Int
     }
-
-
-
--------------------------------------------------------------------------
--- Part 1: What is the position of the boat after executing the commands?
--------------------------------------------------------------------------
 
 
 part1Answer : List Command -> Int
@@ -39,6 +37,48 @@ part1Answer commands =
 
 multiplyPositions : Position -> Int
 multiplyPositions position =
+    position.depth * position.forward
+
+
+
+-----------------------------------------------------------------------------------
+-- Part 2: Calculate the boat position using the new interpretation of the commands
+-----------------------------------------------------------------------------------
+
+
+type alias PositionWithAim =
+    { depth : Int
+    , forward : Int
+    , aim : Int
+    }
+
+
+part2Answer : List Command -> Int
+part2Answer commands =
+    let
+        initial : PositionWithAim
+        initial =
+            PositionWithAim 0 0 0
+    in
+    List.foldl
+        (\cmd acc ->
+            case cmd of
+                Forward amount ->
+                    { acc | forward = acc.forward + amount, depth = acc.depth + acc.aim * amount }
+
+                Down amount ->
+                    { acc | aim = acc.aim + amount }
+
+                Up amount ->
+                    { acc | aim = acc.aim - amount }
+        )
+        initial
+        commands
+        |> multiplyPositionWithAim
+
+
+multiplyPositionWithAim : PositionWithAim -> Int
+multiplyPositionWithAim position =
     position.depth * position.forward
 
 

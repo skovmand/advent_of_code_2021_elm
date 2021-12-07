@@ -20,6 +20,18 @@ suite =
                     |> Day2.parseInput
                     |> Day2.part1Answer
                     |> Expect.equal 1670340
+        , test "part 2 example" <|
+            \() ->
+                exampleInput
+                    |> Day2.parseInput
+                    |> Day2.part2Answer
+                    |> Expect.equal 900
+        , test "part 2 answer" <|
+            \() ->
+                puzzleInput
+                    |> Day2.parseInput
+                    |> Day2.part2Answer
+                    |> Expect.equal 1954293920
         ]
 
 
