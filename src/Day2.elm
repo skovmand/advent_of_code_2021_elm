@@ -59,19 +59,20 @@ toCommand : String -> Maybe Command
 toCommand string =
     case String.split " " string of
         [ "forward", stringAmount ] ->
-            stringAmount
-                |> String.toInt
-                |> Maybe.andThen (\amount -> Just (Forward amount))
+            parseAmount Forward stringAmount
 
         [ "down", stringAmount ] ->
-            stringAmount
-                |> String.toInt
-                |> Maybe.andThen (\amount -> Just (Down amount))
+            parseAmount Down stringAmount
 
         [ "up", stringAmount ] ->
-            stringAmount
-                |> String.toInt
-                |> Maybe.andThen (\amount -> Just (Up amount))
+            parseAmount Up stringAmount
 
         _ ->
             Nothing
+
+
+parseAmount : (Int -> Command) -> String -> Maybe Command
+parseAmount cmdConstructor amountString =
+    amountString
+        |> String.toInt
+        |> Maybe.andThen (\amount -> Just (cmdConstructor amount))
