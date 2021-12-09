@@ -5,19 +5,8 @@ module Day2 exposing (..)
 -------------------------------------------------------------------------
 
 
-type alias Position =
-    { depth : Int
-    , forward : Int
-    }
-
-
 part1Answer : List Command -> Int
 part1Answer commands =
-    let
-        initial : Position
-        initial =
-            Position 0 0
-    in
     List.foldl
         (\cmd acc ->
             case cmd of
@@ -30,12 +19,12 @@ part1Answer commands =
                 Up amount ->
                     { acc | depth = acc.depth - amount }
         )
-        initial
+        { depth = 0, forward = 0 }
         commands
         |> multiplyPositions
 
 
-multiplyPositions : Position -> Int
+multiplyPositions : { depth : Int, forward : Int } -> Int
 multiplyPositions position =
     position.depth * position.forward
 
@@ -46,20 +35,8 @@ multiplyPositions position =
 -----------------------------------------------------------------------------------
 
 
-type alias PositionWithAim =
-    { depth : Int
-    , forward : Int
-    , aim : Int
-    }
-
-
 part2Answer : List Command -> Int
 part2Answer commands =
-    let
-        initial : PositionWithAim
-        initial =
-            PositionWithAim 0 0 0
-    in
     List.foldl
         (\cmd acc ->
             case cmd of
@@ -72,12 +49,12 @@ part2Answer commands =
                 Up amount ->
                     { acc | aim = acc.aim - amount }
         )
-        initial
+        { depth = 0, forward = 0, aim = 0 }
         commands
         |> multiplyPositionWithAim
 
 
-multiplyPositionWithAim : PositionWithAim -> Int
+multiplyPositionWithAim : { depth : Int, forward : Int, aim : Int } -> Int
 multiplyPositionWithAim position =
     position.depth * position.forward
 
@@ -115,4 +92,4 @@ parseAmount : (Int -> Command) -> String -> Maybe Command
 parseAmount cmdConstructor amountString =
     amountString
         |> String.toInt
-        |> Maybe.andThen (\amount -> Just (cmdConstructor amount))
+        |> Maybe.map cmdConstructor

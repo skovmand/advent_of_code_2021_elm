@@ -28,7 +28,7 @@ change ( first, second ) =
 
 pairs : List Int -> List ( Int, Int )
 pairs input =
-    List.map2 (\x1 x2 -> ( x1, x2 ))
+    List.map2 Tuple.pair
         input
         (List.drop 1 input)
 
