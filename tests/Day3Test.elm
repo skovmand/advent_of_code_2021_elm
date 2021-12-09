@@ -1,6 +1,6 @@
 module Day3Test exposing (..)
 
-import Day3 exposing (..)
+import Day3
 import Expect
 import Test exposing (..)
 
