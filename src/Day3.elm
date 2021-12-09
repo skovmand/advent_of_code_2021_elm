@@ -1,4 +1,4 @@
-module Day3 exposing (..)
+module Day3 exposing (parseInput, solvePart1)
 
 import List.Extra
 
@@ -40,10 +40,6 @@ summarizeBinary list =
         )
         (BinarySummary 0 0)
         list
-
-
-type alias BasicRates =
-    { gamma : Int, epsilon : Int }
 
 
 toBasicRates : List BinarySummary -> { gammaRate : Int, epsilonRate : Int }
