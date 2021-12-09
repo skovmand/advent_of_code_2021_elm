@@ -1,0 +1,22 @@
+{
+  "name": "advent_of_elm_21",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skovmand/advent_of_elm_21.git"
+  },
+  "author": "",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/skovmand/advent_of_elm_21/issues"
+  },
+  "homepage": "https://github.com/skovmand/advent_of_elm_21#readme"
+}
