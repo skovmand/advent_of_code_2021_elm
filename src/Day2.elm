@@ -1,12 +1,12 @@
-module Day2 exposing (..)
+module Day2 exposing (parseInput, solvePart1, solvePart2)
 
 -------------------------------------------------------------------------
 -- Part 1: What is the position of the boat after executing the commands?
 -------------------------------------------------------------------------
 
 
-part1Answer : List Command -> Int
-part1Answer commands =
+solvePart1 : List Command -> Int
+solvePart1 commands =
     List.foldl
         (\cmd acc ->
             case cmd of
@@ -35,8 +35,8 @@ multiplyPositions position =
 -----------------------------------------------------------------------------------
 
 
-part2Answer : List Command -> Int
-part2Answer commands =
+solvePart2 : List Command -> Int
+solvePart2 commands =
     List.foldl
         (\cmd acc ->
             case cmd of

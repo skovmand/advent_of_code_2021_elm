@@ -1,4 +1,4 @@
-module Day1 exposing (..)
+module Day1 exposing (parseInput, solvePart1, solvePart2)
 
 
 parseInput : String -> List Int
@@ -33,8 +33,8 @@ pairs input =
         (List.drop 1 input)
 
 
-part1Answer : List Int -> Int
-part1Answer input =
+solvePart1 : List Int -> Int
+solvePart1 input =
     input
         |> pairs
         |> List.map change
@@ -55,8 +55,8 @@ sumTriple ( num1, num2, num3 ) =
     num1 + num2 + num3
 
 
-part2Answer : List Int -> Int
-part2Answer input =
+solvePart2 : List Int -> Int
+solvePart2 input =
     input
         |> triples
         |> List.map sumTriple

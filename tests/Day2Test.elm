@@ -12,25 +12,25 @@ suite =
             \() ->
                 exampleInput
                     |> Day2.parseInput
-                    |> Day2.part1Answer
+                    |> Day2.solvePart1
                     |> Expect.equal 150
         , test "part 1 answer" <|
             \() ->
                 puzzleInput
                     |> Day2.parseInput
-                    |> Day2.part1Answer
+                    |> Day2.solvePart1
                     |> Expect.equal 1670340
         , test "part 2 example" <|
             \() ->
                 exampleInput
                     |> Day2.parseInput
-                    |> Day2.part2Answer
+                    |> Day2.solvePart2
                     |> Expect.equal 900
         , test "part 2 answer" <|
             \() ->
                 puzzleInput
                     |> Day2.parseInput
-                    |> Day2.part2Answer
+                    |> Day2.solvePart2
                     |> Expect.equal 1954293920
         ]
 
