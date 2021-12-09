@@ -1,7 +1,6 @@
 {
   "name": "advent_of_elm_21",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "directories": {
     "test": "tests"
@@ -18,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/skovmand/advent_of_elm_21/issues"
   },
-  "homepage": "https://github.com/skovmand/advent_of_elm_21#readme"
+  "homepage": "https://github.com/skovmand/advent_of_elm_21#readme",
+  "description": "",
+  "devDependencies": {
+    "elm-review": "^2.7.0"
+  }
 }
