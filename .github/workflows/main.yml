@@ -10,9 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install local dependencies
-      - run: |
-        npm install
-        ./node_modules/bin/elm-tooling install
+        run: |
+          npm install
+          ./node_modules/bin/elm-tooling install
       - name: Check formatting of source files
         run: ./node_modules/bin/elm-format ./src ./tests --validate
       - name: Elm review
