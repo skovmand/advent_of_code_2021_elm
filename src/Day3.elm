@@ -22,18 +22,13 @@ solvePart1 : List (List Char) -> Int
 solvePart1 binaryList =
     binaryList
         |> List.Extra.transpose
-        |> List.map summarizeBinary
-        |> binarySummariesToGammaAndEpsilon
-        |> (\rates -> rates.gammaRate * rates.epsilonRate)
-
-
-{-| Convert a list of binary summaries to gamma and epsilon rate
--}
-binarySummariesToGammaAndEpsilon : List BinarySummary -> { gammaRate : Int, epsilonRate : Int }
-binarySummariesToGammaAndEpsilon summaries =
-    { gammaRate = binarySummariesToBase10 toMostCommonBit summaries
-    , epsilonRate = binarySummariesToBase10 toLeastCommonBit summaries
-    }
+        |> (\list ->
+                [ List.map (summarizeBinary toMostCommonBit) list
+                , List.map (summarizeBinary toLeastCommonBit) list
+                ]
+           )
+        |> List.map binaryToBase10
+        |> List.foldl (*) 1
 
 
 
@@ -94,8 +89,7 @@ filterBinariesByBitAtIndex summarizer index binaries =
         bitToKeep =
             binaries
                 |> List.filterMap (Array.get index)
-                |> summarizeBinary
-                |> summarizer
+                |> summarizeBinary summarizer
     in
     case binaries of
         -- Only one binary left, return that for the remaining iterations
@@ -131,8 +125,8 @@ type alias SuperSummarizer =
     BinarySummary -> Char
 
 
-summarizeBinary : List Char -> BinarySummary
-summarizeBinary list =
+summarizeBinary : SuperSummarizer -> List Char -> Char
+summarizeBinary summarizer list =
     List.foldl
         (\bit acc ->
             case bit of
@@ -147,13 +141,7 @@ summarizeBinary list =
         )
         (BinarySummary 0 0)
         list
-
-
-binarySummariesToBase10 : SuperSummarizer -> List BinarySummary -> Int
-binarySummariesToBase10 summarizer binarySummaries =
-    binarySummaries
-        |> List.map summarizer
-        |> binaryToBase10
+        |> summarizer
 
 
 toMostCommonBit : SuperSummarizer
