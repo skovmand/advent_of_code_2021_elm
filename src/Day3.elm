@@ -12,6 +12,12 @@ parseInput input =
         |> List.map String.toList
 
 
+
+------------
+-- Part 1 --
+------------
+
+
 solvePart1 : List (List Char) -> Int
 solvePart1 binaryList =
     binaryList
@@ -21,41 +27,53 @@ solvePart1 binaryList =
         |> (\rates -> rates.gammaRate * rates.epsilonRate)
 
 
+{-| Convert a list of binary summaries to gamma and epsilon rate
+-}
+binarySummariesToGammaAndEpsilon : List BinarySummary -> { gammaRate : Int, epsilonRate : Int }
+binarySummariesToGammaAndEpsilon summaries =
+    { gammaRate = binarySummariesToBase10 toMostCommonBit summaries
+    , epsilonRate = binarySummariesToBase10 toLeastCommonBit summaries
+    }
+
+
+
+------------
+-- Part 2 --
+------------
+
+
 solvePart2 : List (List Char) -> Maybe Int
 solvePart2 binaryList =
     let
-        -- Convert binaries to arrays to be able to use Array.get
-        binariesArrays : List (Array Char)
-        binariesArrays =
-            List.map Array.fromList binaryList
-
-        -- Generate the indexes to iterate over (defaulting to [] for convenience)
-        indexes : List Int
-        indexes =
-            listOfIndexes binaryList
-                |> Maybe.withDefault []
-
         oxygenGeneratorRating =
-            List.foldl
-                (filterBinariesByCriteriaAndIndex toMostCommonBit)
-                binariesArrays
-                indexes
-                |> singleElementListToBase10
+            calculateRating toMostCommonBit binaryList
 
         co2ScrubberRating =
-            List.foldl
-                (filterBinariesByCriteriaAndIndex toLeastCommonBit)
-                binariesArrays
-                indexes
-                |> singleElementListToBase10
+            calculateRating toLeastCommonBit binaryList
     in
     Maybe.map2 (\a b -> a * b) oxygenGeneratorRating co2ScrubberRating
 
 
+{-| Calculate a rating given a SuperSummarizer
+-}
+calculateRating : SuperSummarizer -> List (List Char) -> Maybe Int
+calculateRating summarizer binaryList =
+    let
+        -- Convert binaries to arrays to be able to use Array.get later on
+        binariesArrays : List (Array Char)
+        binariesArrays =
+            List.map Array.fromList binaryList
+    in
+    binaryList
+        |> listOfBinaryIndexes
+        |> Maybe.map (List.foldl (filterBinariesByBitAtIndex summarizer) binariesArrays)
+        |> Maybe.andThen singleElementListToBase10
+
+
 {-| Generate a list of indexes to consider, e.g. [0, 1, 2, 3]
 -}
-listOfIndexes : List (List Char) -> Maybe (List Int)
-listOfIndexes binaryList =
+listOfBinaryIndexes : List (List Char) -> Maybe (List Int)
+listOfBinaryIndexes binaryList =
     let
         binaryLength binary =
             binary |> List.length |> (+) -1
@@ -66,11 +84,10 @@ listOfIndexes binaryList =
 
 
 {-| Function to be used with List.foldl iteratively to filter a list of binaries by most common bit.
-Can be curried with the SelectionCriteria function which is (BinarySummary -> Char), and then it takes
-the index, and a list of binaries.
+Can be curried with a SuperSummarizer, and then it takes the index, and a list of binaries.
 -}
-filterBinariesByCriteriaAndIndex : (BinarySummary -> Char) -> Int -> List (Array Char) -> List (Array Char)
-filterBinariesByCriteriaAndIndex selectionCriteria index binaries =
+filterBinariesByBitAtIndex : SuperSummarizer -> Int -> List (Array Char) -> List (Array Char)
+filterBinariesByBitAtIndex summarizer index binaries =
     let
         -- Map the remaining binaries into a list of column bits
         bitToKeep : Char
@@ -78,7 +95,7 @@ filterBinariesByCriteriaAndIndex selectionCriteria index binaries =
             binaries
                 |> List.filterMap (Array.get index)
                 |> summarizeBinary
-                |> selectionCriteria
+                |> summarizer
     in
     case binaries of
         -- Only one binary left, return that for the remaining iterations
@@ -95,15 +112,23 @@ filterBinariesByCriteriaAndIndex selectionCriteria index binaries =
                 remainingBinaries
 
 
-singleElementListToBase10 : List (Array Char) -> Maybe Int
-singleElementListToBase10 list =
-    list
-        |> List.head
-        |> Maybe.map (Array.toList >> binaryToBase10)
+
+------------
+-- Common --
+------------
 
 
+{-| This is a summary of a binary
+-}
 type alias BinarySummary =
     { zeros : Int, ones : Int }
+
+
+{-| A SuperSummarizer takes a BinarySummary and reduces it to a single character,
+in a sense summarizing the summaries!
+-}
+type alias SuperSummarizer =
+    BinarySummary -> Char
 
 
 summarizeBinary : List Char -> BinarySummary
@@ -124,23 +149,14 @@ summarizeBinary list =
         list
 
 
-{-| Convert a list of binary summaries to gamma and epsilon rate
--}
-binarySummariesToGammaAndEpsilon : List BinarySummary -> { gammaRate : Int, epsilonRate : Int }
-binarySummariesToGammaAndEpsilon summaries =
-    { gammaRate = binarySummariesToBase10 toMostCommonBit summaries, epsilonRate = binarySummariesToBase10 toLeastCommonBit summaries }
-
-
-{-| Given a selection criteria (e.g. toMostCommonBit), convert a list of binary summaries to an integer
--}
-binarySummariesToBase10 : (BinarySummary -> Char) -> List BinarySummary -> Int
-binarySummariesToBase10 selectionCriteria binarySummaries =
+binarySummariesToBase10 : SuperSummarizer -> List BinarySummary -> Int
+binarySummariesToBase10 summarizer binarySummaries =
     binarySummaries
-        |> List.map selectionCriteria
+        |> List.map summarizer
         |> binaryToBase10
 
 
-toMostCommonBit : BinarySummary -> Char
+toMostCommonBit : SuperSummarizer
 toMostCommonBit summary =
     if summary.ones >= summary.zeros then
         '1'
@@ -149,13 +165,20 @@ toMostCommonBit summary =
         '0'
 
 
-toLeastCommonBit : BinarySummary -> Char
+toLeastCommonBit : SuperSummarizer
 toLeastCommonBit summary =
     if summary.ones >= summary.zeros then
         '0'
 
     else
         '1'
+
+
+singleElementListToBase10 : List (Array Char) -> Maybe Int
+singleElementListToBase10 list =
+    list
+        |> List.head
+        |> Maybe.map (Array.toList >> binaryToBase10)
 
 
 binaryToBase10 : List Char -> Int

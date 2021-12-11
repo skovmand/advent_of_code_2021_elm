@@ -35,6 +35,7 @@ suite =
         ]
 
 
+exampleInput : String
 exampleInput =
     """
 00100
@@ -52,6 +53,7 @@ exampleInput =
 """
 
 
+puzzleInput : String
 puzzleInput =
     """
 011111101011
