@@ -65,7 +65,7 @@ listOfIndexes binaryList =
         |> Maybe.map (binaryLength >> List.range 0)
 
 
-{-| Function to use with List.foldl iteratively to filter a list of binaries by most common bit.
+{-| Function to be used with List.foldl iteratively to filter a list of binaries by most common bit.
 Can be curried with the SelectionCriteria function which is (BinarySummary -> Char), and then it takes
 the index, and a list of binaries.
 -}
@@ -124,20 +124,20 @@ summarizeBinary list =
         list
 
 
+{-| Convert a list of binary summaries to gamma and epsilon rate
+-}
 binarySummariesToGammaAndEpsilon : List BinarySummary -> { gammaRate : Int, epsilonRate : Int }
-binarySummariesToGammaAndEpsilon summary =
-    let
-        gammaRate =
-            summary
-                |> List.map toMostCommonBit
-                |> binaryToBase10
+binarySummariesToGammaAndEpsilon summaries =
+    { gammaRate = binarySummariesToBase10 toMostCommonBit summaries, epsilonRate = binarySummariesToBase10 toLeastCommonBit summaries }
 
-        epsilonRate =
-            summary
-                |> List.map toLeastCommonBit
-                |> binaryToBase10
-    in
-    { gammaRate = gammaRate, epsilonRate = epsilonRate }
+
+{-| Given a selection criteria (e.g. toMostCommonBit), convert a list of binary summaries to an integer
+-}
+binarySummariesToBase10 : (BinarySummary -> Char) -> List BinarySummary -> Int
+binarySummariesToBase10 selectionCriteria binarySummaries =
+    binarySummaries
+        |> List.map selectionCriteria
+        |> binaryToBase10
 
 
 toMostCommonBit : BinarySummary -> Char
