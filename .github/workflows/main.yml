@@ -9,15 +9,13 @@ jobs:
       image: node:16
     steps:
       - uses: actions/checkout@v2
-      - name: Install global dependencies
-        run: npm install -g elm elm-test elm-format
       - name: Install local dependencies
-        run: npm install
+      - run: |
+        npm install
+        ./node_modules/bin/elm-tooling install
       - name: Check formatting of source files
-        run: elm-format ./src --validate
-      - name: Check formatting of test files
-        run: elm-format ./tests --validate
+        run: ./node_modules/bin/elm-format ./src ./tests --validate
       - name: Elm review
-        run: ./node_modules/.bin/elm-review
+        run: ./node_modules/bin/elm-review
       - name: Run tests
-        run: elm-test
+        run: ./node_modules/bin/elm-test-rs
