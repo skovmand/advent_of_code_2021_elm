@@ -6,7 +6,9 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "format": "elm-format ./src ./tests",
+    "review": "elm-review",
+    "test": "elm-test-rs"
   },
   "repository": {
     "type": "git",
