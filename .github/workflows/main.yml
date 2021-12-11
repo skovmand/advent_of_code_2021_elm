@@ -12,10 +12,10 @@ jobs:
       - name: Install local dependencies
         run: |
           npm install
-          ./node_modules/bin/elm-tooling install
+          ./node_modules/.bin/elm-tooling install
       - name: Check formatting of source files
-        run: ./node_modules/bin/elm-format ./src ./tests --validate
+        run: ./node_modules/.bin/elm-format ./src ./tests --validate
       - name: Elm review
-        run: ./node_modules/bin/elm-review
+        run: ./node_modules/.bin/elm-review
       - name: Run tests
-        run: ./node_modules/bin/elm-test-rs
+        run: ./node_modules/.bin/elm-test-rs
