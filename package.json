@@ -20,6 +20,7 @@
   "homepage": "https://github.com/skovmand/advent_of_elm_21#readme",
   "description": "",
   "devDependencies": {
-    "elm-review": "^2.7.0"
+    "elm-review": "^2.7.0",
+    "elm-tooling": "^1.7.0"
   }
 }
