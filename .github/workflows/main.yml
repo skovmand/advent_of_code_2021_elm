@@ -16,6 +16,6 @@ jobs:
       - name: Check formatting of source files
         run: ./node_modules/.bin/elm-format ./src ./tests --validate
       - name: Elm review
-        run: ./node_modules/.bin/elm-review
+        run: ./node_modules/.bin/elm-review --compiler ./node_modules/.bin/elm
       - name: Run tests
         run: ./node_modules/.bin/elm-test-rs
