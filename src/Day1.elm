@@ -60,7 +60,4 @@ solvePart2 input =
     input
         |> triples
         |> List.map sumTriple
-        |> pairs
-        |> List.map change
-        |> List.filter (\elem -> elem == Increase)
-        |> List.length
+        |> solvePart1
