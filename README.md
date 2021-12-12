@@ -10,9 +10,12 @@ Note: I'm not using the browser at all, everything runs through `elm-test`
 ## Run the tests!
 
 ```
-# Install elm-test
-$ npm install -g elm-test
+# Install npm dependencies
+$ npm install
+
+# Install elm, elm-test-rs, elm-format, elm-json locally too (through elm-tooling)
+$ npx elm-tooling install
 
 # Run the test suite
-$ elm-test
+$ npm test
 ```
