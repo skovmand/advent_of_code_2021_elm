@@ -2,7 +2,7 @@ module Day4 exposing (..)
 
 import List.Extra
 import Set exposing (..)
-import Utilities exposing (maybeMap)
+import Utilities exposing (maybeAll)
 
 
 
@@ -55,35 +55,37 @@ parseDraws : String -> Maybe Draws
 parseDraws drawLine =
     drawLine
         |> String.split ","
-        |> maybeMap String.toInt
+        |> List.map String.toInt
+        |> maybeAll
 
 
 parseBoards : List String -> Maybe (List Board)
 parseBoards boardLines =
-    maybeMap parseBoardLines boardLines
+    boardLines
+        |> List.map parseBoardLines
+        |> maybeAll
 
 
 {-| Convert a string of 5 lines to a board
 -}
 parseBoardLines : String -> Maybe Board
 parseBoardLines input =
-    input
-        |> String.split "\n"
-        |> parseBoardLine
-
-
-parseBoardLine : List String -> Maybe Board
-parseBoardLine list =
-    case list of
+    case String.split "\n" input of
         [ n1, n2, n3, n4, n5 ] ->
             [ n1, n2, n3, n4, n5 ]
-                |> List.map (String.split " ")
-                |> List.map (List.filter (\element -> element /= ""))
-                |> List.map (maybeMap String.toInt)
-                |> maybeMap identity
+                |> List.map stringToBoardLine
+                |> maybeAll
 
         _ ->
             Nothing
+
+
+stringToBoardLine : String -> Maybe (List Int)
+stringToBoardLine string =
+    String.split " " string
+        |> List.filter (\element -> element /= "")
+        |> List.map String.toInt
+        |> maybeAll
 
 
 
