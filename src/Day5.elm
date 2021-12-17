@@ -102,28 +102,14 @@ rangeToList range =
 
 unfoldVerticalRange : CoordinateRange -> List Coordinate
 unfoldVerticalRange ( ( ax, ay ), ( _, by ) ) =
-    let
-        range =
-            if ay > by then
-                List.range by ay
-
-            else
-                List.range ay by
-    in
-    List.map (\y -> ( ax, y )) range
+    List.range ( min ay by ) ( max ay by )
+    |> List.map (\y -> ( ax, y ))
 
 
 unfoldHorizontalRange : CoordinateRange -> List Coordinate
 unfoldHorizontalRange ( ( ax, ay ), ( bx, _ ) ) =
-    let
-        range =
-            if ax > bx then
-                List.range bx ax
-
-            else
-                List.range ax bx
-    in
-    List.map (\x -> ( x, ay )) range
+    List.range ( min ax bx ) ( max ax bx )
+    |> List.map (\x -> ( x, ay ))
 
 
 applyCoordinates : List Coordinate -> Dict Coordinate Int
