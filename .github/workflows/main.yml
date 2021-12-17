@@ -19,4 +19,4 @@ jobs:
       - name: Elm review
         run: npx elm-review
       - name: Run tests
-        run: npx elm-test-rs
+        run: npx elm-test
