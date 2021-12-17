@@ -7,8 +7,7 @@
   },
   "scripts": {
     "format": "elm-format ./src ./tests",
-    "review": "elm-review",
-    "test": "elm-test-rs"
+    "review": "elm-review"
   },
   "repository": {
     "type": "git",
