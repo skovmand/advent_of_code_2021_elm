@@ -1,4 +1,4 @@
-module Day6 exposing (..)
+module Day6 exposing (parseInput, solvePart1, solvePart2)
 
 import Dict exposing (Dict)
 import Utilities exposing (maybeAll)
@@ -61,27 +61,24 @@ evolveDays days fishTimers =
 
 evolveStep : Dict Int Int -> Dict Int Int
 evolveStep fishTimers =
-    let
-        newFishCount =
-            fishTimers
-                |> Dict.get 0
-                |> Maybe.withDefault 0
-    in
-    fishTimers
-        |> Dict.toList
-        |> List.map (\( timer, count ) -> ( timer - 1, count ))
-        |> List.filter (\( timer, _ ) -> timer >= 0)
-        |> (\list -> ( 8, newFishCount ) :: list)
-        |> Dict.fromList
-        -- We need to update the 6s to add the sum of old fish coming from 0
-        |> Dict.update 6 (addNewFishCount newFishCount)
+    Dict.foldr
+        (\timer count newDict ->
+            case timer of
+                0 ->
+                    newDict
+                        |> Dict.insert 8 count
+                        |> Dict.update 6
+                            (\value ->
+                                case value of
+                                    Nothing ->
+                                        Just count
 
+                                    Just c ->
+                                        Just (c + count)
+                            )
 
-addNewFishCount : Int -> Maybe Int -> Maybe Int
-addNewFishCount extra existingCount =
-    case existingCount of
-        Nothing ->
-            Just extra
-
-        Just count ->
-            Just (count + extra)
+                n ->
+                    Dict.insert (n - 1) count newDict
+        )
+        Dict.empty
+        fishTimers
