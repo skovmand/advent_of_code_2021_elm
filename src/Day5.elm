@@ -64,9 +64,7 @@ solvePart1 : List CoordinateRange -> Int
 solvePart1 input =
     input
         |> List.filter (\range -> rangeType range /= Diagonal)
-        |> List.concatMap rangeToList
-        |> applyCoordinates
-        |> countCoordinatesWithTwoOrMore
+        |> solvePart2
 
 
 solvePart2 : List CoordinateRange -> Int
@@ -142,6 +140,8 @@ unfoldDiagonalRange ( ( ax, ay ), ( bx, by ) ) =
     List.map2 (\a b -> ( a, b )) xRange yRange
 
 
+{-| Apply a list of coordinates to an empty dict
+-}
 applyCoordinates : List Coordinate -> Dict Coordinate Int
 applyCoordinates coords =
     List.foldl
@@ -164,9 +164,17 @@ updateCoordinateCount coord dict =
         dict
 
 
+{-| Dict.foldl is faster than using List.filter over Dict.values
+-}
 countCoordinatesWithTwoOrMore : Dict Coordinate Int -> Int
 countCoordinatesWithTwoOrMore dict =
     dict
-        |> Dict.values
-        |> List.filter (\v -> v > 1)
-        |> List.length
+        |> Dict.foldl
+            (\_ val acc ->
+                if val > 1 then
+                    acc + 1
+
+                else
+                    acc
+            )
+            0
