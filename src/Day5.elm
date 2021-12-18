@@ -56,15 +56,23 @@ parseCoordinate input =
 
 
 -----------------------
--- PART 1
+-- PART 1 + 2
 -----------------------
 
 
 solvePart1 : List CoordinateRange -> Int
 solvePart1 input =
     input
-        |> List.filterMap rangeToList
-        |> List.concat
+        |> List.filter (\range -> rangeType range /= Diagonal)
+        |> List.concatMap rangeToList
+        |> applyCoordinates
+        |> countCoordinatesWithTwoOrMore
+
+
+solvePart2 : List CoordinateRange -> Int
+solvePart2 input =
+    input
+        |> List.concatMap rangeToList
         |> applyCoordinates
         |> countCoordinatesWithTwoOrMore
 
@@ -72,7 +80,7 @@ solvePart1 input =
 type RangeType
     = Horizontal
     | Vertical
-    | Other
+    | Diagonal
 
 
 rangeType : CoordinateRange -> RangeType
@@ -84,32 +92,54 @@ rangeType ( ( ax, ay ), ( bx, by ) ) =
         Horizontal
 
     else
-        Other
+        Diagonal
 
 
-rangeToList : CoordinateRange -> Maybe (List Coordinate)
+rangeToList : CoordinateRange -> List Coordinate
 rangeToList range =
     case rangeType range of
         Vertical ->
-            Just (unfoldVerticalRange range)
+            unfoldVerticalRange range
 
         Horizontal ->
-            Just (unfoldHorizontalRange range)
+            unfoldHorizontalRange range
 
-        Other ->
-            Nothing
+        Diagonal ->
+            unfoldDiagonalRange range
 
 
 unfoldVerticalRange : CoordinateRange -> List Coordinate
 unfoldVerticalRange ( ( ax, ay ), ( _, by ) ) =
-    List.range ( min ay by ) ( max ay by )
-    |> List.map (\y -> ( ax, y ))
+    List.range (min ay by) (max ay by)
+        |> List.map (\y -> ( ax, y ))
 
 
 unfoldHorizontalRange : CoordinateRange -> List Coordinate
 unfoldHorizontalRange ( ( ax, ay ), ( bx, _ ) ) =
-    List.range ( min ax bx ) ( max ax bx )
-    |> List.map (\x -> ( x, ay ))
+    List.range (min ax bx) (max ax bx)
+        |> List.map (\x -> ( x, ay ))
+
+
+unfoldDiagonalRange : CoordinateRange -> List Coordinate
+unfoldDiagonalRange ( ( ax, ay ), ( bx, by ) ) =
+    let
+        xRange =
+            if ax > bx then
+                List.range bx ax
+                    |> List.reverse
+
+            else
+                List.range ax bx
+
+        yRange =
+            if ay > by then
+                List.range by ay
+                    |> List.reverse
+
+            else
+                List.range ay by
+    in
+    List.map2 (\a b -> ( a, b )) xRange yRange
 
 
 applyCoordinates : List Coordinate -> Dict Coordinate Int
