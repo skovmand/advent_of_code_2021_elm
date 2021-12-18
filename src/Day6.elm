@@ -1,50 +1,87 @@
 module Day6 exposing (..)
 
+import Dict exposing (Dict)
 import Utilities exposing (maybeAll)
 
 
-parseInput : String -> Maybe (List Int)
+parseInput : String -> Maybe (Dict Int Int)
 parseInput input =
     input
         |> String.split ","
         |> List.map String.toInt
         |> maybeAll
+        |> Maybe.map toFishDict
 
 
-solvePart1 : List Int -> Int
+toFishDict : List Int -> Dict Int Int
+toFishDict fishTimers =
+    List.foldl
+        (\timer dict ->
+            Dict.update
+                timer
+                (\value ->
+                    case value of
+                        Nothing ->
+                            Just 1
+
+                        Just count ->
+                            Just (count + 1)
+                )
+                dict
+        )
+        Dict.empty
+        fishTimers
+
+
+solvePart1 : Dict Int Int -> Int
 solvePart1 fishTimers =
     evolveDays 80 fishTimers
-        |> List.length
+        |> Dict.values
+        |> List.sum
 
 
-solvePart2 : List Int -> Int
+solvePart2 : Dict Int Int -> Int
 solvePart2 fishTimers =
     evolveDays 256 fishTimers
-        |> List.length
+        |> Dict.values
+        |> List.sum
 
 
-evolveDays : Int -> List Int -> List Int
+evolveDays : Int -> Dict Int Int -> Dict Int Int
 evolveDays days fishTimers =
     let
         rounds =
             List.range 1 days
     in
     List.foldl
-        (\_ timers -> evolveStep timers)
+        (\_ timerDict -> evolveStep timerDict)
         fishTimers
         rounds
 
 
-evolveStep : List Int -> List Int
+evolveStep : Dict Int Int -> Dict Int Int
 evolveStep fishTimers =
-    List.foldl
-        (\fish ( evolvedFishes, newFishes ) ->
-            if fish == 0 then
-                ( 6 :: evolvedFishes, 8 :: newFishes )
+    let
+        newFishCount =
+            fishTimers
+                |> Dict.get 0
+                |> Maybe.withDefault 0
+    in
+    fishTimers
+        |> Dict.toList
+        |> List.map (\( timer, count ) -> ( timer - 1, count ))
+        |> List.filter (\( timer, _ ) -> timer >= 0)
+        |> (\list -> ( 8, newFishCount ) :: list)
+        |> Dict.fromList
+        -- We need to update the 6s to add the sum of old fish coming from 0
+        |> Dict.update 6 (addNewFishCount newFishCount)
 
-            else
-                ( (fish - 1) :: evolvedFishes, newFishes )
-        )
-        ( [], [] )
-        fishTimers
-        |> (\( evolved, new ) -> evolved ++ new)
+
+addNewFishCount : Int -> Maybe Int -> Maybe Int
+addNewFishCount extra existingCount =
+    case existingCount of
+        Nothing ->
+            Just extra
+
+        Just count ->
+            Just (count + extra)
