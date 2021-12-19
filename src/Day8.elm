@@ -3,7 +3,7 @@ module Day8 exposing (parseInput, solvePart1, solvePart2)
 import DigitDict exposing (..)
 import List.Extra
 import Set exposing (Set)
-import Utilities exposing (maybeAll)
+import Utilities exposing (maybeAll, maybeListOf2)
 
 
 parseInput : String -> Maybe (List ( List String, List String ))
@@ -177,15 +177,7 @@ add235 patternSets dict =
             [ 7, 9 ]
                 |> List.map (\val -> DigitDict.getSetByValue val dict)
                 |> maybeAll
-                |> Maybe.andThen
-                    (\list ->
-                        case list of
-                            [ a, b ] ->
-                                Just ( a, b )
-
-                            _ ->
-                                Nothing
-                    )
+                |> maybeListOf2
                 |> Maybe.map
                     (\( sevenSet, nineSet ) -> List.filter (\set -> Set.union set sevenSet == nineSet) setsWithLength5)
                 |> Maybe.andThen List.head

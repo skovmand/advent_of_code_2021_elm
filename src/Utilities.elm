@@ -1,4 +1,4 @@
-module Utilities exposing (maybeAll)
+module Utilities exposing (maybeAll, maybeListOf2)
 
 {-| Utilities reused in several puzzles
 -}
@@ -27,4 +27,14 @@ maybeAllInner list acc =
             maybeAllInner rest (a :: acc)
 
         Nothing :: _ ->
+            Nothing
+
+
+maybeListOf2 : Maybe (List a) -> Maybe ( a, a )
+maybeListOf2 list =
+    case list of
+        Just [ a, b ] ->
+            Just ( a, b )
+
+        _ ->
             Nothing
