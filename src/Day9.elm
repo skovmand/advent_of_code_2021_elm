@@ -29,34 +29,58 @@ fillDict intLines =
             (\( y, line ) ->
                 List.indexedMap (\x point -> ( x, y, point )) line
             )
-        |> List.foldl (\( x, y, point ) dictAcc -> Dict.insert ( x, y ) point dictAcc) Dict.empty
+        |> List.foldl
+            (\( x, y, point ) dictAcc -> Dict.insert ( x, y ) point dictAcc)
+            Dict.empty
 
 
-solvePart1 : Dict ( Int, Int ) Int -> Int
+solvePart1 : Dict ( Int, Int ) Int -> Maybe Int
 solvePart1 dict =
+    let
+        lowPoints =
+            findLowPoints dict
+    in
+    lowPoints
+        |> List.map (\point -> Dict.get point dict)
+        |> maybeAll
+        |> Maybe.map (List.map ((+) 1))
+        |> Maybe.map List.sum
+
+
+findLowPoints : Dict ( Int, Int ) Int -> List ( Int, Int )
+findLowPoints dict =
     Dict.foldl
-        (\coord value riskLevelSum ->
+        (\coord value lowPoints ->
             let
                 minAdjacentHeight =
                     adjacentHeights coord dict
                         |> List.minimum
                         -- For convenience, should never happen
                         |> Maybe.withDefault -1
-
-                riskLevel =
-                    if value < minAdjacentHeight then
-                        1 + value
-
-                    else
-                        0
             in
-            riskLevelSum + riskLevel
+            if value < minAdjacentHeight then
+                coord :: lowPoints
+
+            else
+                lowPoints
         )
-        0
+        []
         dict
 
 
 adjacentHeights : ( Int, Int ) -> Dict ( Int, Int ) Int -> List Int
 adjacentHeights ( x, y ) dict =
-    [ ( x + 1 , y ), ( x - 1, y ), ( x, y - 1 ), ( x , y + 1 ) ]
+    [ ( x + 1, y ), ( x - 1, y ), ( x, y - 1 ), ( x, y + 1 ) ]
         |> List.filterMap (\coord -> Dict.get coord dict)
+
+
+
+{-
+   Ideas for part 2: Find all low points. Add to list. Recurse over each one to grow it and count the size.
+   Note: I am taking the assumption that all low points are unique (e.g. there is only one).
+
+   From the task: A basin is all locations that eventually flow downward to a single low point.
+
+   Idea: Rewrite task 1 into making a list of low points.
+         Task 2: Make an algorithm to grow basins.
+-}

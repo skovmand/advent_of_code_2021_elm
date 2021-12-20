@@ -12,13 +12,13 @@ suite =
             \() ->
                 exampleInput
                     |> Day9.parseInput
-                    |> Maybe.map Day9.solvePart1
+                    |> Maybe.andThen Day9.solvePart1
                     |> Expect.equal (Just 15)
         , test "part 1 answer" <|
             \() ->
                 puzzleInput
                     |> Day9.parseInput
-                    |> Maybe.map Day9.solvePart1
+                    |> Maybe.andThen Day9.solvePart1
                     |> Expect.equal (Just 436)
 
         --, test "part 2 example" <|
