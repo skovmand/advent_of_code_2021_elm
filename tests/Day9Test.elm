@@ -20,19 +20,18 @@ suite =
                     |> Day9.parseInput
                     |> Maybe.andThen Day9.solvePart1
                     |> Expect.equal (Just 436)
-
-        --, test "part 2 example" <|
-        --    \() ->
-        --        exampleInput
-        --            |> Day9.parseInput
-        --            |> Maybe.andThen Day9.solvePart2
-        --            |> Expect.equal (Just 61229)
-        --, test "part 2 answer" <|
-        --    \() ->
-        --        puzzleInput
-        --            |> Day9.parseInput
-        --            |> Maybe.andThen Day9.solvePart2
-        --            |> Expect.equal (Just 979171)
+        , test "part 2 example" <|
+            \() ->
+                exampleInput
+                    |> Day9.parseInput
+                    |> Maybe.andThen Day9.solvePart2
+                    |> Expect.equal (Just 1134)
+        , test "part 2 answer" <|
+            \() ->
+                puzzleInput
+                    |> Day9.parseInput
+                    |> Maybe.andThen Day9.solvePart2
+                    |> Expect.equal (Just 1317792)
         ]
 
 

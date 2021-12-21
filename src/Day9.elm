@@ -1,6 +1,7 @@
-module Day9 exposing (parseInput, solvePart1)
+module Day9 exposing (parseInput, solvePart1, solvePart2)
 
 import Dict exposing (Dict)
+import Set exposing (Set)
 import Utilities exposing (maybeAll)
 
 
@@ -47,6 +48,27 @@ solvePart1 dict =
         |> Maybe.map List.sum
 
 
+solvePart2 : Dict ( Int, Int ) Int -> Maybe Int
+solvePart2 dict =
+    let
+        lowPoints =
+            findLowPoints dict
+    in
+    lowPoints
+        |> List.map (expandPool dict)
+        |> List.map Set.size
+        |> List.sort
+        |> List.reverse
+        |> (\list ->
+                case list of
+                    a :: b :: c :: _ ->
+                        Just (a * b * c)
+
+                    _ ->
+                        Nothing
+           )
+
+
 findLowPoints : Dict ( Int, Int ) Int -> List ( Int, Int )
 findLowPoints dict =
     Dict.foldl
@@ -74,13 +96,104 @@ adjacentHeights ( x, y ) dict =
         |> List.filterMap (\coord -> Dict.get coord dict)
 
 
+expandPool : Dict ( Int, Int ) Int -> ( Int, Int ) -> Set ( Int, Int )
+expandPool allPoints startPoint =
+    expandStep allPoints (Set.fromList [ startPoint ]) startPoint
 
-{-
-   Ideas for part 2: Find all low points. Add to list. Recurse over each one to grow it and count the size.
-   Note: I am taking the assumption that all low points are unique (e.g. there is only one).
 
-   From the task: A basin is all locations that eventually flow downward to a single low point.
+type Direction
+    = Up
+    | Down
+    | Left
+    | Right
 
-   Idea: Rewrite task 1 into making a list of low points.
-         Task 2: Make an algorithm to grow basins.
+
+expandStep : Dict ( Int, Int ) Int -> Set ( Int, Int ) -> ( Int, Int ) -> Set ( Int, Int )
+expandStep allPoints pointSet currentPoint =
+    [ Up, Left, Down, Right ]
+        |> List.foldl
+            (\direction poolPointAcc ->
+                let
+                    nextPoint_ =
+                        nextPoint allPoints direction currentPoint
+                            |> nothingIf9 allPoints
+                            |> nothingIfAlreadyInSet poolPointAcc
+
+                    updatedAcc =
+                        case nextPoint_ of
+                            Just point ->
+                                Set.insert point poolPointAcc
+
+                            Nothing ->
+                                poolPointAcc
+                in
+                case nextPoint_ of
+                    Just coord ->
+                        expandStep allPoints updatedAcc coord
+
+                    Nothing ->
+                        updatedAcc
+            )
+            pointSet
+
+
+{-| If a coordinate has value 9, treat is as Nothing
 -}
+nothingIf9 : Dict ( Int, Int ) Int -> Maybe ( Int, Int ) -> Maybe ( Int, Int )
+nothingIf9 allPoints coordinate =
+    coordinate
+        -- TODO: Dict.get -> Dict.member
+        |> Maybe.andThen (\point -> Dict.get point allPoints)
+        |> Maybe.andThen
+            (\value ->
+                case value of
+                    9 ->
+                        Nothing
+
+                    _ ->
+                        coordinate
+            )
+
+
+nothingIfAlreadyInSet : Set ( Int, Int ) -> Maybe ( Int, Int ) -> Maybe ( Int, Int )
+nothingIfAlreadyInSet setOfPoints coordinate =
+    coordinate
+        |> Maybe.andThen
+            (\point ->
+                if Set.member point setOfPoints then
+                    Nothing
+
+                else
+                    coordinate
+            )
+
+
+{-| Given a currentPoint and a direction, return the next point coordinates or Nothing.
+-}
+nextPoint : Dict ( Int, Int ) Int -> Direction -> ( Int, Int ) -> Maybe ( Int, Int )
+nextPoint allPoints direction currentPoint =
+    let
+        next =
+            calcNextPoint direction currentPoint
+    in
+    if Dict.member next allPoints then
+        Just next
+
+    else
+        Nothing
+
+
+calcNextPoint : Direction -> ( Int, Int ) -> ( Int, Int )
+calcNextPoint direction currentPoint =
+    case direction of
+        Up ->
+            Tuple.mapSecond (\y -> y - 1) currentPoint
+
+        Down ->
+            Tuple.mapSecond (\y -> y + 1) currentPoint
+
+        Left ->
+            Tuple.mapFirst (\x -> x - 1) currentPoint
+
+        Right ->
+            Tuple.mapFirst (\x -> x + 1) currentPoint
