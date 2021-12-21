@@ -1,8 +1,18 @@
 module Day9 exposing (parseInput, solvePart1, solvePart2)
 
+{-| Day 9: Smoke Basin.
+Featuring a nice recursive homegrown pool crawling algorithm.
+-}
+
 import Dict exposing (Dict)
 import Set exposing (Set)
 import Utilities exposing (maybeAll)
+
+
+
+---------------
+-- PARSE
+---------------
 
 
 parseInput : String -> Maybe (Dict ( Int, Int ) Int)
@@ -28,21 +38,23 @@ fillDict intLines =
     List.indexedMap Tuple.pair intLines
         |> List.concatMap
             (\( y, line ) ->
-                List.indexedMap (\x point -> ( x, y, point )) line
+                List.indexedMap (\x pointHeight -> ( x, y, pointHeight )) line
             )
         |> List.foldl
-            (\( x, y, point ) dictAcc -> Dict.insert ( x, y ) point dictAcc)
+            (\( x, y, pointHeight ) dictAcc -> Dict.insert ( x, y ) pointHeight dictAcc)
             Dict.empty
+
+
+
+-----------------------------
+-- NOW FIND SOME SMOKE HOLES!
+-----------------------------
 
 
 solvePart1 : Dict ( Int, Int ) Int -> Maybe Int
 solvePart1 dict =
-    let
-        lowPoints =
-            findLowPoints dict
-    in
-    lowPoints
-        |> List.map (\point -> Dict.get point dict)
+    findLowPoints dict
+        |> List.map (\coord -> Dict.get coord dict)
         |> maybeAll
         |> Maybe.map (List.map ((+) 1))
         |> Maybe.map List.sum
@@ -50,11 +62,7 @@ solvePart1 dict =
 
 solvePart2 : Dict ( Int, Int ) Int -> Maybe Int
 solvePart2 dict =
-    let
-        lowPoints =
-            findLowPoints dict
-    in
-    lowPoints
+    findLowPoints dict
         |> List.map (expandPool dict)
         |> List.map Set.size
         |> List.sort
@@ -69,6 +77,9 @@ solvePart2 dict =
            )
 
 
+{-| Find the low points of the 2D grid. Note that there is a single low point for each pool.
+Returns a list of coordinates.
+-}
 findLowPoints : Dict ( Int, Int ) Int -> List ( Int, Int )
 findLowPoints dict =
     Dict.foldl
@@ -77,7 +88,7 @@ findLowPoints dict =
                 minAdjacentHeight =
                     adjacentHeights coord dict
                         |> List.minimum
-                        -- For convenience, should never happen
+                        -- Should never happen, because there's always at least 2 adjacent coordinates
                         |> Maybe.withDefault -1
             in
             if value < minAdjacentHeight then
@@ -90,15 +101,21 @@ findLowPoints dict =
         dict
 
 
+{-| Given a coordinate, get adjacent heights. Filters out non-existing fields
+(e.g. when on the edge of the map)
+-}
 adjacentHeights : ( Int, Int ) -> Dict ( Int, Int ) Int -> List Int
-adjacentHeights ( x, y ) dict =
+adjacentHeights ( x, y ) allPoints =
     [ ( x + 1, y ), ( x - 1, y ), ( x, y - 1 ), ( x, y + 1 ) ]
-        |> List.filterMap (\coord -> Dict.get coord dict)
+        |> List.filterMap (\coord -> Dict.get coord allPoints)
 
 
+{-| Recursive pool expansion algorithm
+Given all points and the coordinate of a point in a pool, crawl the pool and return a set of all its coordinates
+-}
 expandPool : Dict ( Int, Int ) Int -> ( Int, Int ) -> Set ( Int, Int )
-expandPool allPoints startPoint =
-    expandStep allPoints (Set.fromList [ startPoint ]) startPoint
+expandPool allPoints startCoord =
+    expandStep allPoints (Set.fromList [ startCoord ]) startCoord
 
 
 type Direction
@@ -109,44 +126,41 @@ type Direction
 
 
 expandStep : Dict ( Int, Int ) Int -> Set ( Int, Int ) -> ( Int, Int ) -> Set ( Int, Int )
-expandStep allPoints pointSet currentPoint =
+expandStep allPoints poolCoords currentCoord =
+    -- Every coordinate called with expandStep will attempt to go all 4 directions
     [ Up, Left, Down, Right ]
         |> List.foldl
-            (\direction poolPointAcc ->
+            (\direction poolCoordsAcc ->
                 let
-                    nextPoint_ =
-                        nextPoint allPoints direction currentPoint
+                    -- Calculate the next coord from the direction and the current coord
+                    -- Returns Nothing if height of point is 9
+                    -- Returns Nothing for coords already visited
+                    nextPoolCoord =
+                        nextCoord allPoints direction currentCoord
                             |> nothingIf9 allPoints
-                            |> nothingIfAlreadyInSet poolPointAcc
-
-                    updatedAcc =
-                        case nextPoint_ of
-                            Just point ->
-                                Set.insert point poolPointAcc
-
-                            Nothing ->
-                                poolPointAcc
+                            |> nothingIfAlreadyInSet poolCoordsAcc
                 in
-                case nextPoint_ of
+                case nextPoolCoord of
+                    -- A next coordinate exists, recurse into it
                     Just coord ->
-                        expandStep allPoints updatedAcc coord
+                        expandStep allPoints (Set.insert coord poolCoordsAcc) coord
 
+                    -- We have met a dead end, backtrack, returning the new set of points
                     Nothing ->
-                        updatedAcc
+                        poolCoordsAcc
             )
-            pointSet
+            poolCoords
 
 
-{-| If a coordinate has value 9, treat is as Nothing
+{-| If a coordinate has height 9, treat is as Nothing
 -}
 nothingIf9 : Dict ( Int, Int ) Int -> Maybe ( Int, Int ) -> Maybe ( Int, Int )
 nothingIf9 allPoints coordinate =
     coordinate
-        -- TODO: Dict.get -> Dict.member
-        |> Maybe.andThen (\point -> Dict.get point allPoints)
+        |> Maybe.andThen (\coord -> Dict.get coord allPoints)
         |> Maybe.andThen
-            (\value ->
-                case value of
+            (\pointHeight ->
+                case pointHeight of
                     9 ->
                         Nothing
 
@@ -156,11 +170,11 @@ nothingIf9 allPoints coordinate =
 
 
 nothingIfAlreadyInSet : Set ( Int, Int ) -> Maybe ( Int, Int ) -> Maybe ( Int, Int )
-nothingIfAlreadyInSet setOfPoints coordinate =
+nothingIfAlreadyInSet setOfCoords coordinate =
     coordinate
         |> Maybe.andThen
-            (\point ->
-                if Set.member point setOfPoints then
+            (\coord ->
+                if Set.member coord setOfCoords then
                     Nothing
 
                 else
@@ -168,13 +182,13 @@ nothingIfAlreadyInSet setOfPoints coordinate =
             )
 
 
-{-| Given a currentPoint and a direction, return the next point coordinates or Nothing.
+{-| Given a coord and a direction, return the next coordinate or Nothing.
 -}
-nextPoint : Dict ( Int, Int ) Int -> Direction -> ( Int, Int ) -> Maybe ( Int, Int )
-nextPoint allPoints direction currentPoint =
+nextCoord : Dict ( Int, Int ) Int -> Direction -> ( Int, Int ) -> Maybe ( Int, Int )
+nextCoord allPoints direction coord =
     let
         next =
-            calcNextPoint direction currentPoint
+            calcNextCoord direction coord
     in
     if Dict.member next allPoints then
         Just next
@@ -183,17 +197,17 @@ nextPoint allPoints direction currentPoint =
         Nothing
 
 
-calcNextPoint : Direction -> ( Int, Int ) -> ( Int, Int )
-calcNextPoint direction currentPoint =
+calcNextCoord : Direction -> ( Int, Int ) -> ( Int, Int )
+calcNextCoord direction coord =
     case direction of
         Up ->
-            Tuple.mapSecond (\y -> y - 1) currentPoint
+            Tuple.mapSecond (\y -> y - 1) coord
 
         Down ->
-            Tuple.mapSecond (\y -> y + 1) currentPoint
+            Tuple.mapSecond (\y -> y + 1) coord
 
         Left ->
-            Tuple.mapFirst (\x -> x - 1) currentPoint
+            Tuple.mapFirst (\x -> x - 1) coord
 
         Right ->
-            Tuple.mapFirst (\x -> x + 1) currentPoint
+            Tuple.mapFirst (\x -> x + 1) coord
