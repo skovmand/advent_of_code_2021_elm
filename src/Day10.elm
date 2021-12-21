@@ -4,6 +4,8 @@ import Utilities exposing (maybeAll)
 
 
 {-| Day 10: Syntax Scoring
+I was hoping to improve the handling of Maybes in the code by parsing everything up front.
+It turned out to be very verbose :-)
 -}
 
 
@@ -81,24 +83,13 @@ solvePart1 list =
     list
         |> List.map parseChunkLine
         |> List.filter (\chunkLine -> not (isIncomplete chunkLine))
-        |> calculateTotalScore
-
-
-calculateTotalScore : List ParseStatus -> Int
-calculateTotalScore statuses =
-    List.map calculateLineScore statuses
+        |> List.map calculateLineScore
         |> List.sum
 
 
 calculateLineScore : ParseStatus -> Int
 calculateLineScore status =
     case status of
-        Successful ->
-            0
-
-        Incomplete _ ->
-            0
-
         InvalidCharacter char ->
             case char of
                 ClosingParenthesis ->
@@ -115,6 +106,9 @@ calculateLineScore status =
 
                 _ ->
                     0
+
+        _ ->
+            0
 
 
 
@@ -187,6 +181,12 @@ middleElementInList list =
             |> List.sort
             |> List.drop (length // 2)
             |> List.head
+
+
+
+---------------------------------------------
+-- THE AWESOME PART: THE RECURSIVE PARSER
+---------------------------------------------
 
 
 type ParseStatus
