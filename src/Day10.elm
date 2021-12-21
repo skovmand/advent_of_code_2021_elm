@@ -1,4 +1,4 @@
-module Day10 exposing (parseInput, solvePart1)
+module Day10 exposing (parseInput, solvePart1, solvePart2)
 
 import Utilities exposing (maybeAll)
 
@@ -80,14 +80,14 @@ solvePart1 : List (List ChunkChars) -> Int
 solvePart1 list =
     list
         |> List.map parseChunkLine
-        |> List.filter (\chunkLine -> chunkLine /= Incomplete)
+        |> List.filter (\chunkLine -> not (isIncomplete chunkLine))
         |> calculateTotalScore
 
 
 calculateTotalScore : List ParseStatus -> Int
 calculateTotalScore statuses =
     List.map calculateLineScore statuses
-    |> List.sum
+        |> List.sum
 
 
 calculateLineScore : ParseStatus -> Int
@@ -96,7 +96,7 @@ calculateLineScore status =
         Successful ->
             0
 
-        Incomplete ->
+        Incomplete _ ->
             0
 
         InvalidCharacter char ->
@@ -117,10 +117,82 @@ calculateLineScore status =
                     0
 
 
+
+-----------------------------
+-- PART 2
+-----------------------------
+
+
+solvePart2 : List (List ChunkChars) -> Maybe Int
+solvePart2 list =
+    list
+        |> List.map parseChunkLine
+        |> List.filterMap getRemainingStack
+        |> List.map (List.map invertChar)
+        |> List.map calculateAutocompleteScore
+        |> middleElementInList
+
+
+getRemainingStack : ParseStatus -> Maybe (List ChunkChars)
+getRemainingStack status =
+    case status of
+        Successful ->
+            Nothing
+
+        Incomplete stack ->
+            Just stack
+
+        InvalidCharacter _ ->
+            Nothing
+
+
+calculateAutocompleteScore : List ChunkChars -> Int
+calculateAutocompleteScore list =
+    List.foldl
+        (\char score -> score * 5 + pointsForChar char)
+        0
+        list
+
+
+pointsForChar : ChunkChars -> Int
+pointsForChar char =
+    case char of
+        ClosingParenthesis ->
+            1
+
+        ClosingBracket ->
+            2
+
+        ClosingCurlyBrace ->
+            3
+
+        ClosingPizza ->
+            4
+
+        _ ->
+            0
+
+
+middleElementInList : List Int -> Maybe Int
+middleElementInList list =
+    let
+        length =
+            List.length list
+    in
+    if remainderBy 2 length == 0 then
+        Nothing
+
+    else
+        list
+            |> List.sort
+            |> List.drop (length // 2)
+            |> List.head
+
+
 type ParseStatus
     = Successful
     | InvalidCharacter ChunkChars
-    | Incomplete
+    | Incomplete (List ChunkChars)
 
 
 parseChunkLine : List ChunkChars -> ParseStatus
@@ -136,7 +208,7 @@ doParseChunkLine stack chunkString =
                 Successful
 
             else
-                Incomplete
+                Incomplete stack
 
         head :: tail ->
             if isOpeningChar head then
@@ -193,3 +265,13 @@ invertChar chunk =
 
         ClosingPizza ->
             OpeningPizza
+
+
+isIncomplete : ParseStatus -> Bool
+isIncomplete status =
+    case status of
+        Incomplete _ ->
+            True
+
+        _ ->
+            False

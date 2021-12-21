@@ -20,19 +20,18 @@ suite =
                     |> Day10.parseInput
                     |> Maybe.map Day10.solvePart1
                     |> Expect.equal (Just 411471)
-
-        --, test "part 2 example" <|
-        --    \() ->
-        --        exampleInput
-        --            |> Day10.parseInput
-        --            |> Maybe.andThen Day10.solvePart2
-        --            |> Expect.equal (Just 1134)
-        --, test "part 2 answer" <|
-        --    \() ->
-        --        puzzleInput
-        --            |> Day10.parseInput
-        --            |> Maybe.andThen Day10.solvePart2
-        --            |> Expect.equal (Just 1317792)
+        , test "part 2 example" <|
+            \() ->
+                exampleInput
+                    |> Day10.parseInput
+                    |> Maybe.andThen Day10.solvePart2
+                    |> Expect.equal (Just 288957)
+        , test "part 2 answer" <|
+            \() ->
+                puzzleInput
+                    |> Day10.parseInput
+                    |> Maybe.andThen Day10.solvePart2
+                    |> Expect.equal (Just 3122628974)
         ]
 
 
