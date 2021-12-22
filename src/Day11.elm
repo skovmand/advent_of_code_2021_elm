@@ -1,4 +1,4 @@
-module Day11 exposing (parseInput, solvePart1)
+module Day11 exposing (parseInput, solvePart1, solvePart2)
 
 {-| Day 11: Dumbo Octopus
 -}
@@ -53,11 +53,11 @@ fillDict intLines =
 
 solvePart1 : Dict ( Int, Int ) Int -> Int
 solvePart1 energyLevels =
-    solveRounds 100 { energyLevels = energyLevels, flashCount = 0 }
+    solveNRounds 100 { energyLevels = energyLevels, flashCount = 0 }
 
 
-solveRounds : Int -> { energyLevels : Dict ( Int, Int ) Int, flashCount : Int } -> Int
-solveRounds rounds { energyLevels, flashCount } =
+solveNRounds : Int -> { energyLevels : Dict ( Int, Int ) Int, flashCount : Int } -> Int
+solveNRounds rounds { energyLevels, flashCount } =
     if rounds < 1 then
         flashCount
 
@@ -67,7 +67,35 @@ solveRounds rounds { energyLevels, flashCount } =
             |> flash Set.empty
             |> addFlashesToTotalCount flashCount
             |> resetFlashed
-            |> solveRounds (rounds - 1)
+            |> solveNRounds (rounds - 1)
+
+
+
+-----------------------------
+-- PART 2
+-----------------------------
+
+
+solvePart2 : Dict ( Int, Int ) Int -> Int
+solvePart2 energyLevels =
+    findFirstSyncFlash 1 energyLevels
+
+
+findFirstSyncFlash : Int -> Dict ( Int, Int ) Int -> Int
+findFirstSyncFlash round energyLevels =
+    let
+        updated =
+            energyLevels
+                |> addOne
+                |> flash Set.empty
+                |> addFlashesToTotalCount 0
+                |> resetFlashed
+    in
+    if updated.flashCount == 100 then
+        round
+
+    else
+        findFirstSyncFlash (round + 1) updated.energyLevels
 
 
 addOne : Dict ( Int, Int ) Int -> Dict ( Int, Int ) Int
@@ -75,6 +103,8 @@ addOne energyLevels =
     Dict.map (\_ val -> val + 1) energyLevels
 
 
+{-| Helper for part 1
+-}
 addFlashesToTotalCount : Int -> ( Dict ( Int, Int ) Int, Set ( Int, Int ) ) -> { energyLevels : Dict ( Int, Int ) Int, flashCount : Int }
 addFlashesToTotalCount totalFlashCount ( energyLevels, flashedThisRound ) =
     { energyLevels = energyLevels, flashCount = totalFlashCount + Set.size flashedThisRound }
