@@ -10,7 +10,7 @@ and don't visit small caves more than once. There are two types of caves: big ca
 
 import Dict exposing (Dict)
 import List.Extra
-import Set exposing (Set)
+import Set
 import Utilities exposing (maybeAll)
 
 
@@ -73,55 +73,12 @@ toDict connections =
 -----------------------------
 
 
+{-| Part 1: Just traverse, making sure small caves are never visited more than once
+-}
 solvePart1 : Dict String (List String) -> Int
 solvePart1 connections =
-    traversePaths "start" connections [ "start" ] Set.empty
+    traversePaths "start" connections [ "start" ] Dict.empty
         |> List.length
-
-
-traversePaths : String -> Dict String (List String) -> List String -> Set String -> List (List String)
-traversePaths node allConnections currentNodePath smallCavesVisited =
-    let
-        updatedSmallCavesVisited =
-            if String.toLower node == node then
-                Set.insert node smallCavesVisited
-
-            else
-                smallCavesVisited
-
-        -- get the connections for this node, remove small caves already visited
-        nodeConnections =
-            Dict.get node allConnections
-                |> Maybe.withDefault []
-                |> removeSmallCaves smallCavesVisited
-    in
-    -- go through each connection
-    List.foldl
-        (\nodeName connectionAcc ->
-            let
-                updatedCurrentPath =
-                    nodeName :: currentNodePath
-            in
-            -- the end node is reached, return the full path that got us here
-            if nodeName == "end" then
-                updatedCurrentPath :: connectionAcc
-
-            else
-                -- we are not at an end node, traverse further into the graph
-                -- once returning, append the paths to the accumulator
-                -- we are relying on all recursive calls eventually returning to the end node, no infinitely cyclic paths
-                List.append
-                    (traversePaths nodeName allConnections updatedCurrentPath updatedSmallCavesVisited)
-                    connectionAcc
-        )
-        []
-        nodeConnections
-
-
-removeSmallCaves : Set String -> List String -> List String
-removeSmallCaves smallCavesVisited nodeList =
-    nodeList
-        |> List.filter (\node -> not (Set.member node smallCavesVisited))
 
 
 
@@ -130,6 +87,9 @@ removeSmallCaves smallCavesVisited nodeList =
 -----------------------------
 
 
+{-| Part 2: Make a small hack by finding all small caves, then traversing for each of them.
+This is allowed by setting the visit count to -1 for the cave that is allowed to be visited twice.
+-}
 solvePart2 : Dict String (List String) -> Int
 solvePart2 connections =
     connections
@@ -140,7 +100,7 @@ solvePart2 connections =
                     smallCaveVisits =
                         Dict.fromList [ ( nodeThatCanBeVisitedTwice, -1 ) ]
                 in
-                traversePaths2nd "start" connections [ "start" ] smallCaveVisits
+                traversePaths "start" connections [ "start" ] smallCaveVisits
                     |> List.foldl (\path pathSetAcc -> Set.insert path pathSetAcc) pathSet
             )
             Set.empty
@@ -151,12 +111,17 @@ smallCaves : Dict String (List String) -> List String
 smallCaves connections =
     connections
         |> Dict.keys
-        |> List.filter (\key -> key /= "start" && key /= "end" && String.toLower key == key)
+        |> List.filter (\nodeName -> nodeName /= "start" && nodeName /= "end" && isSmallCave nodeName)
         |> List.Extra.unique
 
 
-traversePaths2nd : String -> Dict String (List String) -> List String -> Dict String Int -> List (List String)
-traversePaths2nd node allConnections currentNodePath smallCavesVisits =
+isSmallCave : String -> Bool
+isSmallCave nodeName =
+    String.toLower nodeName == nodeName
+
+
+traversePaths : String -> Dict String (List String) -> List String -> Dict String Int -> List (List String)
+traversePaths node allConnections currentNodePath smallCavesVisits =
     let
         updatedSmallCavesVisits =
             if String.toLower node == node then
@@ -178,7 +143,7 @@ traversePaths2nd node allConnections currentNodePath smallCavesVisits =
         nodeConnections =
             Dict.get node allConnections
                 |> Maybe.withDefault []
-                |> removeSmallCaves2nd smallCavesVisits
+                |> removeSmallCaves smallCavesVisits
     in
     -- go through each connection
     List.foldl
@@ -194,17 +159,16 @@ traversePaths2nd node allConnections currentNodePath smallCavesVisits =
             else
                 -- we are not at an end node, traverse further into the graph
                 -- once returning, append the paths to the accumulator
-                -- we are relying on all recursive calls eventually returning to the end node, no infinitely cyclic paths
                 List.append
-                    (traversePaths2nd nodeName allConnections updatedCurrentPath updatedSmallCavesVisits)
+                    (traversePaths nodeName allConnections updatedCurrentPath updatedSmallCavesVisits)
                     connectionAcc
         )
         []
         nodeConnections
 
 
-removeSmallCaves2nd : Dict String Int -> List String -> List String
-removeSmallCaves2nd smallCavesVisited nodeList =
+removeSmallCaves : Dict String Int -> List String -> List String
+removeSmallCaves smallCavesVisited nodeList =
     nodeList
         |> List.filter (nodeNeverVisited smallCavesVisited)
 
