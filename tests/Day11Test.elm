@@ -7,7 +7,7 @@ import Test exposing (..)
 
 suite : Test
 suite =
-    describe "day 10"
+    describe "day 11"
         [ test "part 1 example" <|
             \() ->
                 exampleInput
