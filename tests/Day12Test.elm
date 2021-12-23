@@ -7,45 +7,57 @@ import Test exposing (..)
 
 suite : Test
 suite =
-    describe "day 12"
-        [ test "part 1 example 1" <|
-            \() ->
-                exampleInput1
-                    |> Day12.parseInput
-                    |> Maybe.map Day12.solvePart1
-                    |> Expect.equal (Just 10)
-        , test "part 1 example 2" <|
-            \() ->
-                exampleInput2
-                    |> Day12.parseInput
-                    |> Maybe.map Day12.solvePart1
-                    |> Expect.equal (Just 19)
-        , test "part 1 example 3" <|
-            \() ->
-                exampleInput3
-                    |> Day12.parseInput
-                    |> Maybe.map Day12.solvePart1
-                    |> Expect.equal (Just 226)
-        , test "part 1 answer" <|
-            \() ->
-                puzzleInput
-                    |> Day12.parseInput
-                    |> Maybe.map Day12.solvePart1
-                    |> Expect.equal (Just 4573)
-
-        --, test "part 2 example" <|
-        --    \() ->
-        --        exampleInput
-        --            |> Day12.parseInput
-        --            |> Maybe.map Day12.solvePart2
-        --            |> Expect.equal (Just 195)
-        --, test "part 2 answer" <|
-        --    \() ->
-        --        puzzleInput
-        --            |> Day12.parseInput
-        --            |> Maybe.map Day12.solvePart2
-        --            |> Expect.equal (Just 519)
-        ]
+    Test.only <|
+        describe "day 12"
+            [ test "part 1 example 1" <|
+                \() ->
+                    exampleInput1
+                        |> Day12.parseInput
+                        |> Maybe.map Day12.solvePart1
+                        |> Expect.equal (Just 10)
+            , test "part 1 example 2" <|
+                \() ->
+                    exampleInput2
+                        |> Day12.parseInput
+                        |> Maybe.map Day12.solvePart1
+                        |> Expect.equal (Just 19)
+            , test "part 1 example 3" <|
+                \() ->
+                    exampleInput3
+                        |> Day12.parseInput
+                        |> Maybe.map Day12.solvePart1
+                        |> Expect.equal (Just 226)
+            , test "part 1 answer" <|
+                \() ->
+                    puzzleInput
+                        |> Day12.parseInput
+                        |> Maybe.map Day12.solvePart1
+                        |> Expect.equal (Just 4573)
+            , test "part 2 example 1" <|
+                \() ->
+                    exampleInput1
+                        |> Day12.parseInput
+                        |> Maybe.map Day12.solvePart2
+                        |> Expect.equal (Just 36)
+            , test "part 2 example 2" <|
+                \() ->
+                    exampleInput2
+                        |> Day12.parseInput
+                        |> Maybe.map Day12.solvePart2
+                        |> Expect.equal (Just 103)
+            , test "part 2 example 3" <|
+                \() ->
+                    exampleInput3
+                        |> Day12.parseInput
+                        |> Maybe.map Day12.solvePart2
+                        |> Expect.equal (Just 3509)
+            , test "part 2 answer" <|
+                \() ->
+                    puzzleInput
+                        |> Day12.parseInput
+                        |> Maybe.map Day12.solvePart2
+                        |> Expect.equal (Just 117509)
+            ]
 
 
 exampleInput1 : String
