@@ -77,7 +77,7 @@ toDict connections =
 -}
 solvePart1 : Dict String (List String) -> Int
 solvePart1 connections =
-    traversePaths "start" connections [ "start" ] Dict.empty
+    traversePaths "start" connections [] Dict.empty
         |> List.length
 
 
@@ -100,7 +100,7 @@ solvePart2 connections =
                     smallCaveVisits =
                         Dict.fromList [ ( nodeThatCanBeVisitedTwice, -1 ) ]
                 in
-                traversePaths "start" connections [ "start" ] smallCaveVisits
+                traversePaths "start" connections [] smallCaveVisits
                     |> List.foldl (\path pathSetAcc -> Set.insert path pathSetAcc) pathSet
             )
             Set.empty
