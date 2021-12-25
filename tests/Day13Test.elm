@@ -20,19 +20,28 @@ suite =
                     |> Day13.parseInput
                     |> Maybe.andThen Day13.solvePart1
                     |> Expect.equal (Just 669)
+        , test "additional example for non-middle folding" <|
+            \() ->
+                myOwnExampleNotFoldingAtMiddle
+                    |> Day13.parseInput
+                    |> Maybe.andThen Day13.solvePart1
+                    |> Expect.equal (Just 17)
 
-        -- , test "part 2 example" <|
-        --     \() ->
-        --         exampleInput1
-        --             |> Day13.parseInput
-        --             |> Maybe.map Day13.solvePart2
-        --             |> Expect.equal (Just 36)
-        -- , test "part 2 answer" <|
-        --     \() ->
-        --         puzzleInput
-        --             |> Day13.parseInput
-        --             |> Maybe.map Day13.solvePart2
-        --             |> Expect.equal (Just 117509)
+        -- The answer is not 0, look for the line D13 OUTPUT in stdout
+        , test "part 2 example" <|
+            \() ->
+                exampleInput1
+                    |> Day13.parseInput
+                    |> Maybe.map Day13.solvePart2
+                    |> Expect.equal (Just 0)
+
+        -- The answer is not 0, look for the line D13 OUTPUT in stdout
+        , test "part 2 answer" <|
+            \() ->
+                puzzleInput
+                    |> Day13.parseInput
+                    |> Maybe.map Day13.solvePart2
+                    |> Expect.equal (Just 0)
         ]
 
 
@@ -59,6 +68,79 @@ exampleInput1 =
 9,0
 
 fold along y=7
+fold along x=5
+"""
+
+
+
+-- Additional example: Fold at L12
+-- #..#..#..#.
+-- ....#......
+-- ...........
+-- #..........
+-- ...#....#.#
+-- ...........
+-- ...........
+-- ...........
+-- ...........
+-- ...........
+-- .#....#.###
+-- ....#...... <--- fold here
+-- ......#..##
+-- #..........
+-- #.#........
+-- Right solution:
+-- "#..#..#..#."
+-- "....#......"
+-- "..........."
+-- "#.........."
+-- "...#....#.#"
+-- "..........."
+-- "..........."
+-- "..........."
+-- "#.#........"
+-- "#.........."
+-- ".#....#.###"
+-- Wrong solution:
+-- "#.##..#..#."
+-- "#...#......"
+-- "......#..##"
+-- "#.........."
+-- "...#....#.#"
+-- "..........."
+-- "..........."
+-- "..........."
+-- "..........."
+-- "..........."
+-- ".#....#.###"
+
+
+myOwnExampleNotFoldingAtMiddle : String
+myOwnExampleNotFoldingAtMiddle =
+    """
+0,0
+10,10
+9,12
+6,10
+0,14
+9,10
+0,3
+10,4
+4,11
+6,0
+6,12
+4,1
+0,13
+10,12
+3,4
+3,0
+8,4
+1,10
+2,14
+8,10
+9,0
+
+fold along y=11
 fold along x=5
 """
 

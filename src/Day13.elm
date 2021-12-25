@@ -1,8 +1,9 @@
-module Day13 exposing (parseInput, solvePart1)
+module Day13 exposing (parseInput, solvePart1, solvePart2)
 
 {-| Day 13: Transparent Origami
 -}
 
+import Dict exposing (Dict)
 import Set exposing (Set)
 import Utilities exposing (maybeAll)
 
@@ -136,81 +137,135 @@ solvePart1 { instructions, boardState } =
             Nothing
 
 
+solvePart2 : ParsedInput -> Int
+solvePart2 { instructions, boardState } =
+    instructions
+        |> List.foldl
+            (\instruction boardStateAcc -> applyInstruction instruction boardStateAcc)
+            boardState
+        |> .coords
+        |> writePaperToScreen
+        |> (\_ -> 0)
+
+
 applyInstruction : Instruction -> BoardState -> BoardState
 applyInstruction instruction { boardSize, coords } =
     case instruction of
-        FoldAlongX coord ->
+        FoldAlongX xCoord ->
             let
+                -- partition coords into left and right part, removing coords on the fold line
                 ( left, right ) =
-                    Set.partition
-                        (\( x, _ ) -> x < coord)
-                        coords
-            in
-            right
-                |> flipVertical boardSize coord
-                |> (\boardState -> { boardState | coords = Set.union left boardState.coords })
+                    Set.filter (\( x, _ ) -> x /= xCoord) coords
+                        |> Set.partition (\( x, _ ) -> x < xCoord)
 
-        FoldAlongY coord ->
+                -- transpose the right part so it starts at x=0
+                transposedRight =
+                    Set.map (\( x, y ) -> ( x - (xCoord + 1), y )) right
+
+                newBoardSize =
+                    ( xCoord, Tuple.second boardSize )
+            in
+            -- mirror the top part top to bottom, union it with the unmirrored bottom part
+            -- then mirror the whole union
+            mirrorLeftRight newBoardSize left
+                |> Set.union transposedRight
+                |> mirrorLeftRight newBoardSize
+                |> (\flippedCoords -> { boardSize = newBoardSize, coords = flippedCoords })
+
+        FoldAlongY yCoord ->
             let
+                -- partition coords into top and bottom part, removing coords on the fold line
                 ( top, bottom ) =
-                    Set.partition
-                        (\( _, y ) -> y < coord)
-                        coords
+                    Set.filter (\( _, y ) -> y /= yCoord) coords
+                        |> Set.partition (\( _, y ) -> y < yCoord)
+
+                -- transpose the bottom part so it starts at y=0
+                transposedBottom =
+                    Set.map (\( x, y ) -> ( x, y - (yCoord + 1) )) bottom
+
+                newBoardSize =
+                    ( Tuple.first boardSize, yCoord )
             in
-            bottom
-                |> flipHorizontal boardSize coord
-                |> (\boardState -> { boardState | coords = Set.union top boardState.coords })
+            -- mirror the top part top to bottom, union it with the unmirrored bottom part
+            -- then mirror the whole union
+            mirrorUpsideDown newBoardSize top
+                |> Set.union transposedBottom
+                |> mirrorUpsideDown newBoardSize
+                |> (\flippedCoords -> { boardSize = newBoardSize, coords = flippedCoords })
 
 
-flipVertical : ( Int, Int ) -> Int -> Set ( Int, Int ) -> BoardState
-flipVertical ( boardSizeX, boardSizeY ) flipAtX coords =
+{-| Mirror a board top-to-bottom, so the top row becomes the bottom row, and vice versa
+-}
+mirrorUpsideDown : ( Int, Int ) -> Set ( Int, Int ) -> Set ( Int, Int )
+mirrorUpsideDown ( _, boardSizeY ) coords =
+    Set.map (\( x, y ) -> ( x, (boardSizeY - 1) - y )) coords
+
+
+{-| Mirror a board side-to-side, so the leftmost row becomes the rightmost row, and so on
+-}
+mirrorLeftRight : ( Int, Int ) -> Set ( Int, Int ) -> Set ( Int, Int )
+mirrorLeftRight ( boardSizeX, _ ) coords =
+    Set.map (\( x, y ) -> ( (boardSizeX - 1) - x, y )) coords
+
+
+
+-----------------------------------
+-- UTILITY: WRITE PAPER TO SCREEN
+-----------------------------------
+
+
+writePaperToScreen : Set ( Int, Int ) -> Set ( Int, Int )
+writePaperToScreen coords =
     let
-        newBoardSize =
-            ( flipAtX, boardSizeY )
+        ( x, y ) =
+            toBoardSize coords |> Maybe.withDefault ( 0, 0 )
+
+        dictWithEmptyFields =
+            buildEmptyDict ( x, y )
+
+        dictWithAddedDots =
+            Set.foldl
+                (\coord dict ->
+                    Dict.insert coord "#" dict
+                )
+                dictWithEmptyFields
+                coords
     in
-    Set.map
-        (transposeAlongVerticalAxis boardSizeX flipAtX)
-        coords
-        |> BoardState newBoardSize
+    List.range 0 y
+        |> List.foldl
+            (\row acc ->
+                let
+                    _ =
+                        Dict.filter
+                            (\( _, localY ) _ -> localY == row)
+                            dictWithAddedDots
+                            |> Dict.toList
+                            |> List.map (\( _, val ) -> val)
+                            |> String.join ""
+                            |> Debug.log "D13 OUTPUT"
+                in
+                acc
+            )
+            coords
 
 
-transposeAlongVerticalAxis : Int -> Int -> ( Int, Int ) -> ( Int, Int )
-transposeAlongVerticalAxis boardSizeX flipAtX ( x, y ) =
+buildEmptyDict : ( Int, Int ) -> Dict ( Int, Int ) String
+buildEmptyDict ( x, y ) =
     let
-        remainingRows =
-            boardSizeX - 1 - flipAtX
+        xRange =
+            List.range 0 x
 
-        transposedToOrigin0 =
-            x - (flipAtX + 1)
-
-        mirroredXCoord =
-            remainingRows - transposedToOrigin0
+        yRange =
+            List.range 0 y
     in
-    ( mirroredXCoord, y )
-
-
-flipHorizontal : ( Int, Int ) -> Int -> Set ( Int, Int ) -> BoardState
-flipHorizontal ( boardSizeX, boardSizeY ) flipAtY coords =
-    let
-        newBoardSize =
-            ( boardSizeX, flipAtY )
-    in
-    Set.map
-        (transposeAlongHorizontalAxis boardSizeY flipAtY)
-        coords
-        |> BoardState newBoardSize
-
-
-transposeAlongHorizontalAxis : Int -> Int -> ( Int, Int ) -> ( Int, Int )
-transposeAlongHorizontalAxis boardSizeY flipAtY ( x, y ) =
-    let
-        remainingRows =
-            boardSizeY - 1 - flipAtY
-
-        transposedToOrigin0 =
-            y - (flipAtY + 1)
-
-        mirroredYCoord =
-            remainingRows - transposedToOrigin0
-    in
-    ( x, mirroredYCoord )
+    List.foldl
+        (\yValue outerDict ->
+            List.foldl
+                (\xValue innerDict ->
+                    Dict.insert ( xValue, yValue ) "." innerDict
+                )
+                outerDict
+                xRange
+        )
+        Dict.empty
+        yRange
