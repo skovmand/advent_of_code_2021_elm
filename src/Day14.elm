@@ -1,7 +1,6 @@
-module Day14 exposing (parseInput, solvePart1)
+module Day14 exposing (parseInput, solvePart1, solvePart2)
 
 import Dict exposing (Dict)
-import List.Extra
 import Utilities exposing (maybeAll)
 
 
@@ -82,9 +81,37 @@ fillDict ruleList =
 
 solvePart1 : ParsedInput -> Maybe Int
 solvePart1 { insertionRules, polymerTemplate } =
+    let
+        initialLetterCount =
+            countInitialLetters polymerTemplate
+    in
     polymerTemplate
-        |> applyPairInsertionRounds 10 insertionRules
+        |> pairwise
+        |> initialDict
+        |> (\dictOfPairs -> applyPairInsertionRounds 10 insertionRules ( dictOfPairs, initialLetterCount ))
         |> calculateScore
+
+
+solvePart2 : ParsedInput -> Maybe Int
+solvePart2 { insertionRules, polymerTemplate } =
+    let
+        initialLetterCount =
+            countInitialLetters polymerTemplate
+    in
+    polymerTemplate
+        |> pairwise
+        |> initialDict
+        |> (\dictOfPairs -> applyPairInsertionRounds 40 insertionRules ( dictOfPairs, initialLetterCount ))
+        |> calculateScore
+
+
+countInitialLetters : String -> Dict String Int
+countInitialLetters string =
+    string
+        |> String.split ""
+        |> List.foldl
+            (\letter dictAcc -> Dict.update letter (upsertCount 1) dictAcc)
+            Dict.empty
 
 
 pairwise : String -> List ( String, String )
@@ -96,50 +123,68 @@ pairwise string =
     List.map2 Tuple.pair split (List.drop 1 split)
 
 
-applyPairInsertionRounds : Int -> InsertionRules -> String -> String
-applyPairInsertionRounds rounds rules template =
-    let
-        insertionChars : List String
-        insertionChars =
-            List.map (\pair -> Dict.get pair rules) (pairwise template)
-                |> maybeAll
-                |> Maybe.withDefault []
+type alias DictOfPairs =
+    Dict ( String, String ) Int
 
-        splitTemplate =
-            String.split "" template
-    in
+
+type alias InsertedLetterCountDict =
+    Dict String Int
+
+
+initialDict : List ( String, String ) -> DictOfPairs
+initialDict letterPairs =
+    List.foldl
+        (\entry dictAcc -> Dict.update entry (upsertCount 1) dictAcc)
+        Dict.empty
+        letterPairs
+
+
+applyPairInsertionRounds : Int -> InsertionRules -> ( DictOfPairs, InsertedLetterCountDict ) -> InsertedLetterCountDict
+applyPairInsertionRounds rounds rules ( dictOfPairs, insertedLetterCounts ) =
     if rounds < 1 then
-        template
+        insertedLetterCounts
 
     else
-        List.Extra.interweave splitTemplate insertionChars
-            |> String.join ""
+        Dict.foldl
+            (\( a, b ) count ( dictOfPairsAcc, insertedLettersAcc ) ->
+                let
+                    c =
+                        Dict.get ( a, b ) rules
+                            |> Maybe.withDefault "*"
+
+                    updatedDictOfPairs =
+                        dictOfPairsAcc
+                            |> Dict.update ( a, c ) (upsertCount count)
+                            |> Dict.update ( c, b ) (upsertCount count)
+
+                    updatedInsertedLetters =
+                        insertedLettersAcc
+                            |> Dict.update c (upsertCount count)
+                in
+                ( updatedDictOfPairs, updatedInsertedLetters )
+            )
+            ( Dict.empty, insertedLetterCounts )
+            dictOfPairs
             |> applyPairInsertionRounds (rounds - 1) rules
 
 
-calculateScore : String -> Maybe Int
-calculateScore template =
-    let
-        frequencies =
-            template
-                |> String.split ""
-                |> List.foldl
-                    (\char dictAcc ->
-                        Dict.update char
-                            (\value ->
-                                case value of
-                                    Just n ->
-                                        Just (n + 1)
+upsertCount : Int -> Maybe Int -> Maybe Int
+upsertCount amount maybeValue =
+    case maybeValue of
+        Just v ->
+            Just (v + amount)
 
-                                    Nothing ->
-                                        Just 1
-                            )
-                            dictAcc
-                    )
-                    Dict.empty
-                |> Dict.values
+        Nothing ->
+            Just amount
+
+
+calculateScore : Dict String Int -> Maybe Int
+calculateScore dict =
+    let
+        list =
+            Dict.values dict
     in
     Maybe.map2
         (\max min -> max - min)
-        (List.maximum frequencies)
-        (List.minimum frequencies)
+        (List.maximum list)
+        (List.minimum list)
