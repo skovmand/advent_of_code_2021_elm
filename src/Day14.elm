@@ -80,47 +80,26 @@ fillDict ruleList =
 
 
 solvePart1 : ParsedInput -> Maybe Int
-solvePart1 { insertionRules, polymerTemplate } =
-    let
-        initialLetterCount =
-            countInitialLetters polymerTemplate
-    in
-    polymerTemplate
-        |> pairwise
-        |> initialDict
-        |> (\dictOfPairs -> applyPairInsertionRounds 10 insertionRules ( dictOfPairs, initialLetterCount ))
-        |> calculateScore
+solvePart1 parsedInput =
+    solveRounds 10 parsedInput
 
 
 solvePart2 : ParsedInput -> Maybe Int
-solvePart2 { insertionRules, polymerTemplate } =
+solvePart2 parsedInput =
+    solveRounds 40 parsedInput
+
+
+solveRounds : Int -> ParsedInput -> Maybe Int
+solveRounds rounds { insertionRules, polymerTemplate } =
     let
         initialLetterCount =
-            countInitialLetters polymerTemplate
+            toInitialLetterCount polymerTemplate
+
+        initialDictOfPairs =
+            polymerTemplate |> pairwise |> toInitialDict
     in
-    polymerTemplate
-        |> pairwise
-        |> initialDict
-        |> (\dictOfPairs -> applyPairInsertionRounds 40 insertionRules ( dictOfPairs, initialLetterCount ))
+    applyPairInsertionRounds rounds insertionRules ( initialDictOfPairs, initialLetterCount )
         |> calculateScore
-
-
-countInitialLetters : String -> Dict String Int
-countInitialLetters string =
-    string
-        |> String.split ""
-        |> List.foldl
-            (\letter dictAcc -> Dict.update letter (upsertCount 1) dictAcc)
-            Dict.empty
-
-
-pairwise : String -> List ( String, String )
-pairwise string =
-    let
-        split =
-            String.split "" string
-    in
-    List.map2 Tuple.pair split (List.drop 1 split)
 
 
 type alias DictOfPairs =
@@ -131,14 +110,41 @@ type alias InsertedLetterCountDict =
     Dict String Int
 
 
-initialDict : List ( String, String ) -> DictOfPairs
-initialDict letterPairs =
+{-| Generate the initial letter counts from the polymer template
+-}
+toInitialLetterCount : String -> InsertedLetterCountDict
+toInitialLetterCount string =
+    string
+        |> String.split ""
+        |> List.foldl
+            (\letter dictAcc -> Dict.update letter (upsertCount 1) dictAcc)
+            Dict.empty
+
+
+{-| Generate the initial dictionary from the letter pairs
+-}
+toInitialDict : List ( String, String ) -> DictOfPairs
+toInitialDict letterPairs =
     List.foldl
         (\entry dictAcc -> Dict.update entry (upsertCount 1) dictAcc)
         Dict.empty
         letterPairs
 
 
+{-| Generate a list of 2-tuples from a string using a sliding window moving 1 character forward in each step
+For example "HEY" -> [("H", "E"), ("E", "Y")]
+-}
+pairwise : String -> List ( String, String )
+pairwise string =
+    let
+        split =
+            String.split "" string
+    in
+    List.map2 Tuple.pair split (List.drop 1 split)
+
+
+{-| Recursive solving of the puzzle given a number of rounds, insertion rules and the initial states
+-}
 applyPairInsertionRounds : Int -> InsertionRules -> ( DictOfPairs, InsertedLetterCountDict ) -> InsertedLetterCountDict
 applyPairInsertionRounds rounds rules ( dictOfPairs, insertedLetterCounts ) =
     if rounds < 1 then
@@ -168,6 +174,9 @@ applyPairInsertionRounds rounds rules ( dictOfPairs, insertedLetterCounts ) =
             |> applyPairInsertionRounds (rounds - 1) rules
 
 
+{-| Handy helper to update the count of an element by an amount,
+inserting the count if not present already
+-}
 upsertCount : Int -> Maybe Int -> Maybe Int
 upsertCount amount maybeValue =
     case maybeValue of
@@ -178,7 +187,9 @@ upsertCount amount maybeValue =
             Just amount
 
 
-calculateScore : Dict String Int -> Maybe Int
+{-| Calculate the final score
+-}
+calculateScore : InsertedLetterCountDict -> Maybe Int
 calculateScore dict =
     let
         list =
