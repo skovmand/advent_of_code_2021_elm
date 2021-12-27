@@ -11,7 +11,7 @@ Used resources:
 -}
 
 import Dict exposing (Dict)
-import PriorityQueue exposing (PriorityQueue)
+import PrioritySet exposing (PrioritySet)
 import Set exposing (Set)
 import Utilities exposing (maybeAll, unwrapMaybe)
 
@@ -87,18 +87,17 @@ solvePart1 cave =
 -- læg deres afstand til den samlede afstand, indsæt dem i priority queue
 
 
-doTheDijkstra : ( Int, Int ) -> Cave -> Set ( Int, Int ) -> PriorityQueue ( ( Int, Int ), Int ) -> Int
+doTheDijkstra : ( Int, Int ) -> Cave -> Set ( Int, Int ) -> PrioritySet ( ( Int, Int ), Int ) -> Int
 doTheDijkstra endCoord cave visited priorityQueue =
     let
         ( coord, totalRisk ) =
-            PriorityQueue.head priorityQueue |> unwrapMaybe
+            PrioritySet.head priorityQueue |> unwrapMaybe
 
         updatedPriorityQueue =
             adjacentCoordsAndRisks coord cave visited
                 |> List.foldl
-                    -- Bug: Only update coords already present if the total risk is lower, don't duplicate!
-                    (\( adjCoord, risk ) priorityQueueAcc -> PriorityQueue.insert ( adjCoord, totalRisk + risk ) priorityQueueAcc)
-                    (PriorityQueue.tail priorityQueue)
+                    (\( adjCoord, risk ) priorityQueueAcc -> PrioritySet.insert ( adjCoord, totalRisk + risk ) priorityQueueAcc)
+                    (PrioritySet.tail priorityQueue)
     in
     if coord == endCoord then
         totalRisk
@@ -107,10 +106,10 @@ doTheDijkstra endCoord cave visited priorityQueue =
         doTheDijkstra endCoord cave (Set.insert coord visited) updatedPriorityQueue
 
 
-initialPriorityQueue : PriorityQueue ( ( Int, Int ), Int )
+initialPriorityQueue : PrioritySet ( ( Int, Int ), Int )
 initialPriorityQueue =
-    PriorityQueue.empty Tuple.second
-        |> PriorityQueue.insert ( ( 0, 0 ), 0 )
+    PrioritySet.empty Tuple.second
+        |> PrioritySet.insert ( ( 0, 0 ), 0 )
 
 
 {-| Given a coordinate, get adjacent coords. Filters out non-existing fields
