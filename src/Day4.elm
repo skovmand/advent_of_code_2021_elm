@@ -1,5 +1,9 @@
 module Day4 exposing (..)
 
+{-| Day 4: Giant Squid
+<https://adventofcode.com/2021/day/4>
+-}
+
 import List.Extra
 import Set exposing (..)
 import Utilities exposing (maybeAll)

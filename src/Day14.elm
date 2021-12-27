@@ -1,11 +1,11 @@
 module Day14 exposing (parseInput, solvePart1, solvePart2)
 
+{-| Day 14: Extended Polymerization
+<https://adventofcode.com/2021/day/14>
+-}
+
 import Dict exposing (Dict)
 import Utilities exposing (maybeAll, unwrapMaybe)
-
-
-{-| Day 14: Extended Polymerization
--}
 
 
 

@@ -1,5 +1,9 @@
 module Day2 exposing (parseInput, solvePart1, solvePart2)
 
+{-| Day 2: Dive!
+<https://adventofcode.com/2021/day/2>
+-}
+
 -------------------------------------------------------------------------
 -- Part 1: What is the position of the boat after executing the commands?
 -------------------------------------------------------------------------

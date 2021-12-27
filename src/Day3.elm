@@ -1,5 +1,9 @@
 module Day3 exposing (parseInput, solvePart1, solvePart2)
 
+{-| Day 3: Binary Diagnostic
+<https://adventofcode.com/2021/day/3>
+-}
+
 import Array exposing (..)
 import List.Extra
 import Utilities exposing (unwrapMaybe)

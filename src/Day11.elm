@@ -1,6 +1,7 @@
 module Day11 exposing (parseInput, solvePart1, solvePart2)
 
 {-| Day 11: Dumbo Octopus
+<https://adventofcode.com/2021/day/11>
 -}
 
 import Dict exposing (Dict)

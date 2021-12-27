@@ -1,5 +1,9 @@
 module Day8 exposing (parseInput, solvePart1, solvePart2)
 
+{-| Day 8: Seven Segment Search
+<https://adventofcode.com/2021/day/8>
+-}
+
 import DigitDict exposing (..)
 import List.Extra
 import Set exposing (Set)

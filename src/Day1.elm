@@ -1,5 +1,9 @@
 module Day1 exposing (parseInput, solvePart1, solvePart2)
 
+{-| Day 1: Sonar Sweep
+<https://adventofcode.com/2021/day/1>
+-}
+
 
 parseInput : String -> List Int
 parseInput input =

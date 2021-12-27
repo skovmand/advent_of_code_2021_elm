@@ -1,7 +1,10 @@
 module Day9 exposing (parseInput, solvePart1, solvePart2)
 
 {-| Day 9: Smoke Basin.
+<https://adventofcode.com/2021/day/9>
+
 Featuring a nice recursive homegrown pool crawling algorithm.
+
 -}
 
 import Dict exposing (Dict)

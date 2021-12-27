@@ -1,5 +1,9 @@
 module Day7 exposing (parseInput, solvePart1, solvePart2)
 
+{-| Day 7: The Treachery of Whales
+<https://adventofcode.com/2021/day/7>
+-}
+
 import Utilities exposing (maybeAll, unwrapMaybe)
 
 

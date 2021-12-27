@@ -1,6 +1,7 @@
 module Day12 exposing (parseInput, solvePart1, solvePart2)
 
 {-| Day 12: Passage Pathing
+<https://adventofcode.com/2021/day/12>
 
 Your goal is to find the number of distinct paths that start at start, end at end,
 and don't visit small caves more than once. There are two types of caves: big caves

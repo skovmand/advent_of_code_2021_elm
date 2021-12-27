@@ -1,12 +1,14 @@
 module Day10 exposing (parseInput, solvePart1, solvePart2)
 
-import Utilities exposing (maybeAll)
-
-
 {-| Day 10: Syntax Scoring
+<https://adventofcode.com/2021/day/10>
+
 I was hoping to improve the handling of Maybes in the code by parsing everything up front.
 It turned out to be very verbose :-)
+
 -}
+
+import Utilities exposing (maybeAll)
 
 
 

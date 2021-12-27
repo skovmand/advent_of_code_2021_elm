@@ -1,5 +1,9 @@
 module Day6 exposing (parseInput, solvePart1, solvePart2)
 
+{-| Day 6: Lanternfish
+<https://adventofcode.com/2021/day/6>
+-}
+
 import Dict exposing (Dict)
 import Utilities exposing (maybeAll)
 
