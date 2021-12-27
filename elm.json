@@ -7,11 +7,10 @@
     "dependencies": {
         "direct": {
             "elm/core": "1.0.5",
-            "elm-community/list-extra": "8.5.1"
+            "elm-community/list-extra": "8.5.1",
+            "fifth-postulate/priority-queue": "1.0.0"
         },
-        "indirect": {
-            "elm/json": "1.1.3"
-        }
+        "indirect": {}
     },
     "test-dependencies": {
         "direct": {
@@ -19,6 +18,7 @@
         },
         "indirect": {
             "elm/html": "1.0.0",
+            "elm/json": "1.1.3",
             "elm/random": "1.0.0",
             "elm/time": "1.0.0",
             "elm/virtual-dom": "1.0.2"
