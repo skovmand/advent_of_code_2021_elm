@@ -1,6 +1,6 @@
 module Day7 exposing (parseInput, solvePart1, solvePart2)
 
-import Utilities exposing (maybeAll)
+import Utilities exposing (maybeAll, unwrapMaybe)
 
 
 parseInput : String -> Maybe (List Int)
@@ -26,7 +26,7 @@ calcFuelUsage fuelCalcFn input =
     let
         range =
             Maybe.map2 List.range (List.minimum input) (List.maximum input)
-                |> Maybe.withDefault []
+                |> unwrapMaybe
     in
     List.foldl
         (\pos acc ->

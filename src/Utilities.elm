@@ -1,4 +1,4 @@
-module Utilities exposing (maybeAll, maybeListOf2)
+module Utilities exposing (maybeAll, maybeListOf2, unwrapMaybe)
 
 {-| Utilities reused in several puzzles
 -}
@@ -28,6 +28,16 @@ maybeAllInner list acc =
 
         Nothing :: _ ->
             Nothing
+
+
+unwrapMaybe : Maybe a -> a
+unwrapMaybe maybe =
+    case maybe of
+        Just a ->
+            a
+
+        Nothing ->
+            Debug.todo "Crashing due to unwrapped Maybe with Nothing value"
 
 
 maybeListOf2 : Maybe (List a) -> Maybe ( a, a )

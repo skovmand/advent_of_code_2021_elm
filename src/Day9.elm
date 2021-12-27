@@ -6,7 +6,7 @@ Featuring a nice recursive homegrown pool crawling algorithm.
 
 import Dict exposing (Dict)
 import Set exposing (Set)
-import Utilities exposing (maybeAll)
+import Utilities exposing (maybeAll, unwrapMaybe)
 
 
 
@@ -88,8 +88,7 @@ findLowPoints dict =
                 minAdjacentHeight =
                     adjacentHeights coord dict
                         |> List.minimum
-                        -- Should never happen, because there's always at least 2 adjacent coordinates
-                        |> Maybe.withDefault -1
+                        |> unwrapMaybe
             in
             if value < minAdjacentHeight then
                 coord :: lowPoints

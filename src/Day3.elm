@@ -2,6 +2,7 @@ module Day3 exposing (parseInput, solvePart1, solvePart2)
 
 import Array exposing (..)
 import List.Extra
+import Utilities exposing (unwrapMaybe)
 
 
 parseInput : String -> List (List Char)
@@ -100,8 +101,8 @@ filterBinariesByBitAtIndex summarizer index binaries =
             List.filter
                 (\binary ->
                     Array.get index binary
-                        |> Maybe.andThen (\bit -> Just (bit == bitToKeep))
-                        |> Maybe.withDefault False
+                        |> unwrapMaybe
+                        |> (==) bitToKeep
                 )
                 remainingBinaries
 

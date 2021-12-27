@@ -1,7 +1,7 @@
 module Day14 exposing (parseInput, solvePart1, solvePart2)
 
 import Dict exposing (Dict)
-import Utilities exposing (maybeAll)
+import Utilities exposing (maybeAll, unwrapMaybe)
 
 
 {-| Day 14: Extended Polymerization
@@ -156,7 +156,7 @@ applyPairInsertionRounds rounds rules ( dictOfPairs, insertedLetterCounts ) =
                 let
                     c =
                         Dict.get ( a, b ) rules
-                            |> Maybe.withDefault "*"
+                            |> unwrapMaybe
 
                     updatedDictOfPairs =
                         dictOfPairsAcc

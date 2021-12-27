@@ -5,7 +5,7 @@ module Day13 exposing (parseInput, solvePart1, solvePart2)
 
 import Dict exposing (Dict)
 import Set exposing (Set)
-import Utilities exposing (maybeAll)
+import Utilities exposing (maybeAll, unwrapMaybe)
 
 
 
@@ -218,7 +218,7 @@ writePaperToScreen : Set ( Int, Int ) -> Set ( Int, Int )
 writePaperToScreen coords =
     let
         ( x, y ) =
-            toBoardSize coords |> Maybe.withDefault ( 0, 0 )
+            toBoardSize coords |> unwrapMaybe
 
         dictWithEmptyFields =
             buildEmptyDict ( x, y )
