@@ -4,37 +4,37 @@ module PrioritySet exposing (..)
 It ensures that no value can be inserted twice.
 -}
 
-import PriorityQueue exposing (Priority, PriorityQueue)
+import PriorityQueue exposing (PriorityQueue)
 import Set exposing (Set)
 
 
-type PrioritySet a
-    = PrioritySet { seen : Set a, queue : PriorityQueue a }
+type PrioritySet a b
+    = PrioritySet { seen : Set a, queue : PriorityQueue ( a, b ) }
 
 
-empty : Priority comparable -> PrioritySet comparable
-empty priority =
-    PrioritySet { seen = Set.empty, queue = PriorityQueue.empty priority }
+empty : PrioritySet comparable Int
+empty =
+    PrioritySet { seen = Set.empty, queue = PriorityQueue.empty Tuple.second }
 
 
-insert : comparable -> PrioritySet comparable -> PrioritySet comparable
-insert value ((PrioritySet { seen, queue }) as prioritySet) =
+insert : comparable -> Int -> PrioritySet comparable Int -> PrioritySet comparable Int
+insert value priority ((PrioritySet { seen, queue }) as prioritySet) =
     if Set.member value seen then
         prioritySet
 
     else
         PrioritySet
             { seen = Set.insert value seen
-            , queue = PriorityQueue.insert value queue
+            , queue = PriorityQueue.insert ( value, priority ) queue
             }
 
 
-head : PrioritySet comparable -> Maybe comparable
+head : PrioritySet comparable Int -> Maybe ( comparable, Int )
 head (PrioritySet { queue }) =
     PriorityQueue.head queue
 
 
-tail : PrioritySet comparable -> PrioritySet comparable
+tail : PrioritySet comparable Int -> PrioritySet comparable Int
 tail (PrioritySet { seen, queue }) =
     PrioritySet
         { seen = seen
