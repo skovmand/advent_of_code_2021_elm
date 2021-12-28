@@ -17,6 +17,10 @@ empty =
     PrioritySet { seen = Set.empty, queue = PriorityQueue.empty Tuple.second }
 
 
+{-| Insert a value with a priority into the PrioritySet. Skips already seen values.
+A more correct implementation of this would be not to skip already seen values if they
+have lower/better priorities. In other words, perhaps a PriorityDict would make more sense.
+-}
 insert : comparable -> Int -> PrioritySet comparable Int -> PrioritySet comparable Int
 insert value priority ((PrioritySet { seen, queue }) as prioritySet) =
     if Set.member value seen then
