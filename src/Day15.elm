@@ -12,7 +12,8 @@ Used resources:
 
 import Dict exposing (Dict)
 import PrioritySet exposing (PrioritySet)
-import Utilities exposing (maybeAll, unwrapMaybe)
+import SantasList
+import Utilities exposing (maybeAll, unwrapMaybe, unwrapMaybeWithMessage)
 
 
 
@@ -32,7 +33,7 @@ parseInput input =
         |> String.lines
         |> List.map toIntegers
         |> maybeAll
-        |> unwrapMaybe
+        |> unwrapMaybeWithMessage "PARSE ERROR"
         |> fillDict
 
 
@@ -95,7 +96,7 @@ findEndCoord : Cave -> ( Int, Int )
 findEndCoord cave =
     cave
         |> Dict.toList
-        |> lastListElement
+        |> SantasList.last
         |> unwrapMaybe
         |> Tuple.first
 
@@ -194,18 +195,3 @@ wrapAround value =
         - 1
         |> remainderBy 9
         |> (+) 1
-
-
-{-| Get the last element of a list
--}
-lastListElement : List a -> Maybe a
-lastListElement list =
-    case list of
-        [] ->
-            Nothing
-
-        [ value ] ->
-            Just value
-
-        _ :: rest ->
-            lastListElement rest

@@ -6,8 +6,9 @@ module Day8 exposing (parseInput, solvePart1, solvePart2)
 
 import DigitDict exposing (..)
 import List.Extra
+import SantasList exposing (maybeListOf2)
 import Set exposing (Set)
-import Utilities exposing (maybeAll, maybeListOf2)
+import Utilities exposing (maybeAll)
 
 
 parseInput : String -> Maybe (List ( List String, List String ))

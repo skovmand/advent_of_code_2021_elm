@@ -1,4 +1,4 @@
-module Utilities exposing (maybeAll, maybeListOf2, unwrapMaybe, unwrapMaybeWithMessage)
+module Utilities exposing (maybeAll, unwrapMaybe, unwrapMaybeWithMessage)
 
 {-| Utilities reused in several puzzles
 -}
@@ -52,13 +52,3 @@ unwrapMaybeWithMessage message maybe =
                     "Crash due to unwrapped Maybe with Nothing value. Message: " ++ message
             in
             Debug.todo fullMessage
-
-
-maybeListOf2 : Maybe (List a) -> Maybe ( a, a )
-maybeListOf2 list =
-    case list of
-        Just [ a, b ] ->
-            Just ( a, b )
-
-        _ ->
-            Nothing
