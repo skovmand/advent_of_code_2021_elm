@@ -12,7 +12,6 @@ Used resources:
 
 import Dict exposing (Dict)
 import PrioritySet exposing (PrioritySet)
-import Set exposing (Set)
 import Utilities exposing (maybeAll, unwrapMaybe)
 
 
@@ -74,17 +73,17 @@ solvePart1 cave =
                 |> unwrapMaybe
                 |> Tuple.first
     in
-    doTheDijkstra endCoord cave Set.empty initialPriorityQueue
+    doTheDijkstra endCoord cave initialPriorityQueue
 
 
-doTheDijkstra : ( Int, Int ) -> Cave -> Set ( Int, Int ) -> PrioritySet ( Int, Int ) Int -> Int
-doTheDijkstra endCoord cave visited priorityQueue =
+doTheDijkstra : ( Int, Int ) -> Cave -> PrioritySet ( Int, Int ) Int -> Int
+doTheDijkstra endCoord cave priorityQueue =
     let
         ( coord, totalRisk ) =
             PrioritySet.head priorityQueue |> unwrapMaybe
 
         updatedPriorityQueue =
-            adjacentCoordsAndRisks coord cave visited
+            adjacentCoordsAndRisks coord cave
                 |> List.foldl
                     (\( adjCoord, risk ) priorityQueueAcc -> PrioritySet.insert adjCoord (totalRisk + risk) priorityQueueAcc)
                     (PrioritySet.tail priorityQueue)
@@ -93,7 +92,7 @@ doTheDijkstra endCoord cave visited priorityQueue =
         totalRisk
 
     else
-        doTheDijkstra endCoord cave (Set.insert coord visited) updatedPriorityQueue
+        doTheDijkstra endCoord cave updatedPriorityQueue
 
 
 initialPriorityQueue : PrioritySet ( Int, Int ) Int
@@ -105,10 +104,9 @@ initialPriorityQueue =
 {-| Given a coordinate, get adjacent coords. Filters out non-existing fields
 (e.g. when on the edge of the map)
 -}
-adjacentCoordsAndRisks : ( Int, Int ) -> Cave -> Set ( Int, Int ) -> List ( ( Int, Int ), Int )
-adjacentCoordsAndRisks ( x, y ) cave visited =
+adjacentCoordsAndRisks : ( Int, Int ) -> Cave -> List ( ( Int, Int ), Int )
+adjacentCoordsAndRisks ( x, y ) cave =
     [ ( x + 1, y ), ( x - 1, y ), ( x, y - 1 ), ( x, y + 1 ) ]
-        |> List.filter (\coord -> not (Set.member coord visited))
         |> List.filterMap (\coord -> Dict.get coord cave |> Maybe.map (\value -> ( coord, value )))
 
 
