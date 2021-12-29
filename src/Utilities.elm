@@ -1,4 +1,4 @@
-module Utilities exposing (maybeAll, unwrapMaybe, unwrapMaybeWithMessage)
+module Utilities exposing (maybeAll, unwrapMaybe, unwrapMaybeWithMessage, binaryToBase10)
 
 {-| Utilities reused in several puzzles
 -}
@@ -52,3 +52,18 @@ unwrapMaybeWithMessage message maybe =
                     "Crash due to unwrapped Maybe with Nothing value. Message: " ++ message
             in
             Debug.todo fullMessage
+
+
+binaryToBase10 : List Char -> Int
+binaryToBase10 bits =
+    List.foldr
+        (\bit acc ->
+            if bit == '1' then
+                { position = acc.position + 1, sum = acc.sum + 2 ^ acc.position }
+
+            else
+                { acc | position = acc.position + 1 }
+        )
+        { position = 0, sum = 0 }
+        bits
+        |> .sum

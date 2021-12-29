@@ -7,6 +7,7 @@ module Day3 exposing (parseInput, solvePart1, solvePart2)
 import Array exposing (..)
 import List.Extra
 import Utilities exposing (unwrapMaybe)
+import Utilities exposing (binaryToBase10)
 
 
 parseInput : String -> List (List Char)
@@ -172,18 +173,3 @@ singleElementListToBase10 list =
     list
         |> List.head
         |> Maybe.map (Array.toList >> binaryToBase10)
-
-
-binaryToBase10 : List Char -> Int
-binaryToBase10 bits =
-    List.foldr
-        (\bit acc ->
-            if bit == '1' then
-                { position = acc.position + 1, sum = acc.sum + 2 ^ acc.position }
-
-            else
-                { acc | position = acc.position + 1 }
-        )
-        { position = 0, sum = 0 }
-        bits
-        |> .sum
