@@ -1,76 +1,116 @@
 module Day16Test exposing (..)
 
-import Day16 exposing (Packet(..))
+import Day16 exposing (OperatorType(..), Packet(..))
 import Expect
 import Test exposing (..)
 
 
 suite : Test
 suite =
-    Test.only <|
-        describe "day 15"
-            [ test "part 1 parses literal value" <|
-                \() ->
-                    "D2FE28"
-                        |> Day16.parseInput
-                        |> Maybe.andThen Day16.readOuterPacket
-                        |> Expect.equal (Just (LiteralValue 6 2021))
-            , test "part 1 parses BITS message 38006F45291200" <|
-                \() ->
-                    "38006F45291200"
-                        |> Day16.parseInput
-                        |> Maybe.andThen Day16.readOuterPacket
-                        |> Expect.equal (Just (Operator 1 6 [ LiteralValue 6 10, LiteralValue 2 20 ]))
-            , test "part 1 parses BITS message EE00D40C823060" <|
-                \() ->
-                    "EE00D40C823060"
-                        |> Day16.parseInput
-                        |> Maybe.andThen Day16.readOuterPacket
-                        |> Expect.equal (Just (Operator 7 3 [ LiteralValue 2 1, LiteralValue 4 2, LiteralValue 1 3 ]))
-            , test "part 1 sums version headers in 8A004A801A8002F478" <|
-                \() ->
-                    "8A004A801A8002F478"
-                        |> Day16.parseInput
-                        |> Maybe.andThen Day16.solvePart1
-                        |> Expect.equal (Just 16)
-            , test "part 1 sums version headers in 620080001611562C8802118E34" <|
-                \() ->
-                    "620080001611562C8802118E34"
-                        |> Day16.parseInput
-                        |> Maybe.andThen Day16.solvePart1
-                        |> Expect.equal (Just 12)
-            , test "part 1 sums version headers in C0015000016115A2E0802F182340" <|
-                \() ->
-                    "C0015000016115A2E0802F182340"
-                        |> Day16.parseInput
-                        |> Maybe.andThen Day16.solvePart1
-                        |> Expect.equal (Just 23)
-            , test "part 1 sums version headers in A0016C880162017C3686B18A3D4780" <|
-                \() ->
-                    "A0016C880162017C3686B18A3D4780"
-                        |> Day16.parseInput
-                        |> Maybe.andThen Day16.solvePart1
-                        |> Expect.equal (Just 31)
-            , test "part 1 answer" <|
-                \() ->
-                    puzzleInput
-                        |> Day16.parseInput
-                        |> Maybe.andThen Day16.solvePart1
-                        |> Expect.equal (Just 843)
-
-            --, test "part 2 example" <|
-            --    \() ->
-            --        exampleInput1
-            --            |> Day16.parseInput
-            --            |> Day16.solvePart2
-            --            |> Expect.equal 315
-            --, test "part 2 answer" <|
-            --    \() ->
-            --        puzzleInput
-            --            |> Day16.parseInput
-            --            |> Day16.solvePart2
-            --            |> Expect.equal 2849
-            ]
+    describe "day 15"
+        [ test "part 1 parses literal value" <|
+            \() ->
+                "D2FE28"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.readOuterPacket
+                    |> Expect.equal (Just (LiteralValue 6 2021))
+        , test "part 1 parses BITS message 38006F45291200" <|
+            \() ->
+                "38006F45291200"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.readOuterPacket
+                    |> Expect.equal (Just (Operator 1 LessThan [ LiteralValue 6 10, LiteralValue 2 20 ]))
+        , test "part 1 parses BITS message EE00D40C823060" <|
+            \() ->
+                "EE00D40C823060"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.readOuterPacket
+                    |> Expect.equal (Just (Operator 7 Maximum [ LiteralValue 2 1, LiteralValue 4 2, LiteralValue 1 3 ]))
+        , test "part 1 sums version headers in 8A004A801A8002F478" <|
+            \() ->
+                "8A004A801A8002F478"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart1
+                    |> Expect.equal (Just 16)
+        , test "part 1 sums version headers in 620080001611562C8802118E34" <|
+            \() ->
+                "620080001611562C8802118E34"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart1
+                    |> Expect.equal (Just 12)
+        , test "part 1 sums version headers in C0015000016115A2E0802F182340" <|
+            \() ->
+                "C0015000016115A2E0802F182340"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart1
+                    |> Expect.equal (Just 23)
+        , test "part 1 sums version headers in A0016C880162017C3686B18A3D4780" <|
+            \() ->
+                "A0016C880162017C3686B18A3D4780"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart1
+                    |> Expect.equal (Just 31)
+        , test "part 1 answer" <|
+            \() ->
+                puzzleInput
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart1
+                    |> Expect.equal (Just 843)
+        , test "part 2 calculates C200B40A82" <|
+            \() ->
+                "C200B40A82"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart2
+                    |> Expect.equal (Just 3)
+        , test "part 2 calculates 04005AC33890" <|
+            \() ->
+                "04005AC33890"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart2
+                    |> Expect.equal (Just 54)
+        , test "part 2 calculates 880086C3E88112" <|
+            \() ->
+                "880086C3E88112"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart2
+                    |> Expect.equal (Just 7)
+        , test "part 2 calculates CE00C43D881120" <|
+            \() ->
+                "CE00C43D881120"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart2
+                    |> Expect.equal (Just 9)
+        , test "part 2 calculates D8005AC2A8F0" <|
+            \() ->
+                "D8005AC2A8F0"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart2
+                    |> Expect.equal (Just 1)
+        , test "part 2 calculates F600BC2D8F" <|
+            \() ->
+                "F600BC2D8F"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart2
+                    |> Expect.equal (Just 0)
+        , test "part 2 calculates 9C005AC2F8F0" <|
+            \() ->
+                "9C005AC2F8F0"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart2
+                    |> Expect.equal (Just 0)
+        , test "part 2 calculates 9C0141080250320F1802104A08" <|
+            \() ->
+                "9C0141080250320F1802104A08"
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart2
+                    |> Expect.equal (Just 1)
+        , test "part 2 answer" <|
+            \() ->
+                puzzleInput
+                    |> Day16.parseInput
+                    |> Maybe.andThen Day16.solvePart2
+                    |> Expect.equal (Just 5390807940351)
+        ]
 
 
 puzzleInput : String

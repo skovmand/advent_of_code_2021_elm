@@ -1,4 +1,4 @@
-module Utilities exposing (maybeAll, unwrapMaybe, unwrapMaybeWithMessage, binaryToBase10)
+module Utilities exposing (binaryToBase10, maybeAll, unwrapMaybe, unwrapMaybeWithMessage)
 
 {-| Utilities reused in several puzzles
 -}

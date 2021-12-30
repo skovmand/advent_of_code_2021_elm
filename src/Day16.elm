@@ -1,4 +1,4 @@
-module Day16 exposing (Packet(..), parseInput, readOuterPacket, solvePart1)
+module Day16 exposing (OperatorType(..), Packet(..), parseInput, readOuterPacket, solvePart1, solvePart2)
 
 import List
 import Utilities exposing (binaryToBase10, maybeAll, unwrapMaybeWithMessage)
@@ -6,6 +6,10 @@ import Utilities exposing (binaryToBase10, maybeAll, unwrapMaybeWithMessage)
 
 {-| Day 16: Packet Decoder
 <https://adventofcode.com/2021/day/16>
+
+This was a really fun one. Took me a some time, and is quite verbose, but I'm happy with the result.
+It's always to much fun to see the machine turning bits into rules and logic.
+
 -}
 
 
@@ -15,7 +19,7 @@ import Utilities exposing (binaryToBase10, maybeAll, unwrapMaybeWithMessage)
 ---------------
 
 
-parseInput : String -> Maybe (List Char)
+parseInput : String -> Maybe InputStream
 parseInput input =
     input
         |> String.split ""
@@ -87,23 +91,28 @@ toBinary char =
 
 
 type Packet
-    = Operator Version TypeId (List Packet)
+    = Operator Version OperatorType (List Packet)
     | LiteralValue Version Int
 
 
-type alias TypeId =
-    Int
+type OperatorType
+    = Sum
+    | Product
+    | Minimum
+    | Maximum
+    | GreaterThan
+    | LessThan
+    | EqualTo
 
 
 type alias Version =
     Int
 
 
-solvePart1 : List Char -> Maybe Int
+solvePart1 : InputStream -> Maybe Int
 solvePart1 input =
     readOuterPacket input
-        |> Maybe.map List.singleton
-        |> Maybe.map sumVersionNumbers
+        |> Maybe.map (List.singleton >> sumVersionNumbers)
 
 
 sumVersionNumbers : List Packet -> Int
@@ -121,23 +130,91 @@ sumVersionNumbers packets =
         packets
 
 
-readOuterPacket : List Char -> Maybe Packet
+
+-----------------------------
+-- PART 2
+-----------------------------
+
+
+solvePart2 : InputStream -> Maybe Int
+solvePart2 input =
+    readOuterPacket input
+        |> Maybe.map calculate
+
+
+calculate : Packet -> Int
+calculate packet =
+    case packet of
+        LiteralValue _ value ->
+            value
+
+        Operator _ operatorType subpackets ->
+            let
+                calculatedSubpackets =
+                    List.map calculate subpackets
+            in
+            case operatorType of
+                Sum ->
+                    List.sum calculatedSubpackets
+
+                Product ->
+                    List.product calculatedSubpackets
+
+                Minimum ->
+                    List.minimum calculatedSubpackets
+                        |> unwrapMaybeWithMessage "EMPTY LIST FOR MINIMUM"
+
+                Maximum ->
+                    List.maximum calculatedSubpackets
+                        |> unwrapMaybeWithMessage "EMPTY LIST FOR MAXIMUM"
+
+                GreaterThan ->
+                    applyListOperator (>) calculatedSubpackets
+
+                LessThan ->
+                    applyListOperator (<) calculatedSubpackets
+
+                EqualTo ->
+                    applyListOperator (==) calculatedSubpackets
+
+
+applyListOperator : (Int -> Int -> Bool) -> List Int -> Int
+applyListOperator operator subpackets =
+    case subpackets of
+        [ a, b ] ->
+            if operator a b then
+                1
+
+            else
+                0
+
+        _ ->
+            Debug.todo "EXPECTED LIST OF TWO VALUES"
+
+
+
+---------------------
+-- BITS READING LOGIC
+---------------------
+
+
+type alias InputStream =
+    List Char
+
+
+{-| The BITS transmission has a single outer package
+-}
+readOuterPacket : InputStream -> Maybe Packet
 readOuterPacket input =
-    input
-        |> readManyPackets []
-        |> List.head
+    readNPackets 1 input
+        |> Maybe.map Tuple.first
+        |> Maybe.andThen List.head
 
 
-
-{- Packets can be a list of packets, e.g. many literal values in a row.
-   Packets can be also be a single operator packet with many nested packets.
-   So we need to return a list of packets from readPackets.
+{-| Read many packets until the end of the input stream is reached.
+This is used for "sub"-input streams where a given stream is read to its end.
 -}
-
-
-{-| Read many packets until the end of the input stream is reached
--}
-readManyPackets : List Packet -> List Char -> List Packet
+readManyPackets : List Packet -> InputStream -> List Packet
 readManyPackets parsed input =
     case readPacket input of
         Just ( packet, rest ) ->
@@ -149,12 +226,12 @@ readManyPackets parsed input =
 
 {-| Read a predefined number of packets
 -}
-readNPackets : Int -> List Char -> Maybe ( List Packet, List Char )
+readNPackets : Int -> InputStream -> Maybe ( List Packet, InputStream )
 readNPackets n input =
     doReadNPackets n input []
 
 
-doReadNPackets : Int -> List Char -> List Packet -> Maybe ( List Packet, List Char )
+doReadNPackets : Int -> InputStream -> List Packet -> Maybe ( List Packet, InputStream )
 doReadNPackets n input read =
     if n < 1 then
         Just ( List.reverse read, input )
@@ -164,15 +241,15 @@ doReadNPackets n input read =
             |> Maybe.andThen (\( packet, rest ) -> doReadNPackets (n - 1) rest (packet :: read))
 
 
-{-| Read a single packet, returning the remaining stream
+{-| Read a single packet
 -}
-readPacket : List Char -> Maybe ( Packet, List Char )
+readPacket : InputStream -> Maybe ( Packet, InputStream )
 readPacket input =
     readHeaderAndVersion input
         |> Maybe.andThen delegateParsing
 
 
-delegateParsing : ( ( PacketType, Version ), List Char ) -> Maybe ( Packet, List Char )
+delegateParsing : ( ( PacketType, Version ), InputStream ) -> Maybe ( Packet, InputStream )
 delegateParsing ( ( packetType, packetVersion ), rest ) =
     if rest == [] then
         Nothing
@@ -190,8 +267,11 @@ delegateParsing ( ( packetType, packetVersion ), rest ) =
                 let
                     ( subpackets, restAfterContents ) =
                         parseOperator rest
+
+                    typeVariant =
+                        typeFromTypeId typeId |> unwrapMaybeWithMessage "INVALID TYPE ID"
                 in
-                Just ( Operator packetVersion typeId subpackets, restAfterContents )
+                Just ( Operator packetVersion typeVariant subpackets, restAfterContents )
 
 
 type PacketType
@@ -201,7 +281,7 @@ type PacketType
 
 {-| Read the first six bits to determine packet version and packet type id
 -}
-readHeaderAndVersion : List Char -> Maybe ( ( PacketType, Int ), List Char )
+readHeaderAndVersion : InputStream -> Maybe ( ( PacketType, Int ), InputStream )
 readHeaderAndVersion input =
     case input of
         v1 :: v2 :: v3 :: t1 :: t2 :: t3 :: rest ->
@@ -222,12 +302,12 @@ readHeaderAndVersion input =
             Nothing
 
 
-parseLiteralValue : List Char -> ( Int, List Char )
+parseLiteralValue : InputStream -> ( Int, InputStream )
 parseLiteralValue input =
     doParseLiteralValue input []
 
 
-doParseLiteralValue : List Char -> List (List Char) -> ( Int, List Char )
+doParseLiteralValue : InputStream -> List InputStream -> ( Int, InputStream )
 doParseLiteralValue input bitAcc =
     case input of
         continueReading :: b1 :: b2 :: b3 :: b4 :: rest ->
@@ -252,7 +332,7 @@ doParseLiteralValue input bitAcc =
             Debug.todo "PARSING LITERAL VALUE"
 
 
-parseOperator : List Char -> ( List Packet, List Char )
+parseOperator : InputStream -> ( List Packet, InputStream )
 parseOperator input =
     let
         ( lengthTypeId, rest ) =
@@ -280,7 +360,7 @@ type LengthTypeId
     | SubpacketCount Int
 
 
-readLengthTypeId : List Char -> ( LengthTypeId, List Char )
+readLengthTypeId : InputStream -> ( LengthTypeId, InputStream )
 readLengthTypeId input =
     case input of
         '0' :: rest ->
@@ -303,3 +383,31 @@ readLengthTypeId input =
 
         _ ->
             Debug.todo "READ LENGTH TYPE ID"
+
+
+typeFromTypeId : Int -> Maybe OperatorType
+typeFromTypeId typeId =
+    case typeId of
+        0 ->
+            Just Sum
+
+        1 ->
+            Just Product
+
+        2 ->
+            Just Minimum
+
+        3 ->
+            Just Maximum
+
+        5 ->
+            Just GreaterThan
+
+        6 ->
+            Just LessThan
+
+        7 ->
+            Just EqualTo
+
+        _ ->
+            Nothing

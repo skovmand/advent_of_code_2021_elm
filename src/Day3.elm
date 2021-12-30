@@ -6,8 +6,7 @@ module Day3 exposing (parseInput, solvePart1, solvePart2)
 
 import Array exposing (..)
 import List.Extra
-import Utilities exposing (unwrapMaybe)
-import Utilities exposing (binaryToBase10)
+import Utilities exposing (binaryToBase10, unwrapMaybe)
 
 
 parseInput : String -> List (List Char)
