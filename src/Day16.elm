@@ -1,9 +1,5 @@
 module Day16 exposing (OperatorType(..), Packet(..), parseInput, readOuterPacket, solvePart1, solvePart2)
 
-import List
-import Utilities exposing (binaryToBase10, maybeAll, unwrapMaybeWithMessage)
-
-
 {-| Day 16: Packet Decoder
 <https://adventofcode.com/2021/day/16>
 
@@ -11,6 +7,9 @@ This was a really fun one. Took me a some time, and is quite verbose, but I'm ha
 It's always to much fun to see the machine turning bits into rules and logic.
 
 -}
+
+import List
+import Utilities exposing (binaryToBase10, maybeAll, unwrapMaybeWithMessage)
 
 
 

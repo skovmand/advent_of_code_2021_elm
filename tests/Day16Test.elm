@@ -7,7 +7,7 @@ import Test exposing (..)
 
 suite : Test
 suite =
-    describe "day 15"
+    describe "day 16"
         [ test "part 1 parses literal value" <|
             \() ->
                 "D2FE28"
