@@ -1,12 +1,15 @@
 module Day17 exposing (parseInput, solvePart1, solvePart2)
 
-import SantasList exposing (maybeListOf2)
-import Utilities exposing (maybeAll)
-
-
 {-| Day 17: Trick Shot
 <https://adventofcode.com/2021/day/17>
+
+Pretty simple once I got started. In part 2, I tweaked the generated coordinates until I got no more solutions ;-)
+Solved in on New Years Eve, after the fireworks stopped.
+
 -}
+
+import SantasList exposing (maybeListOf2)
+import Utilities exposing (maybeAll)
 
 
 
