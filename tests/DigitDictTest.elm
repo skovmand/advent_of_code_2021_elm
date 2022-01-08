@@ -8,7 +8,7 @@ import Test exposing (..)
 
 suite : Test
 suite =
-    describe "day 8"
+    describe "digit dict"
         [ test "creates a new dict" <|
             \() ->
                 DigitDict.new
