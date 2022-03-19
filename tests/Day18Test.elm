@@ -16,6 +16,8 @@ suite =
         , magnitudeTests
         , part1Example
         , part1Answer
+        , part2Example
+        , part2Answer
         ]
 
 
@@ -25,7 +27,7 @@ parserTests =
         [ Test.test "Parses [[1,9],[8,5]]" <|
             \_ ->
                 Day18.parseSnail "[[1,9],[8,5]]"
-                    |> Expect.equal (Just (Pair (Pair (RegularNumber 1) (RegularNumber 9)) (Pair (RegularNumber 8) (RegularNumber 5))))
+                    |> Expect.equal (Just (Pair (Pair (Number 1) (Number 9)) (Pair (Number 8) (Number 5))))
         ]
 
 
@@ -344,8 +346,20 @@ splitTests =
         ]
 
 
-part1ExampleInput : String
-part1ExampleInput =
+magnitudeTests : Test.Test
+magnitudeTests =
+    Test.describe "Magnitude tests"
+        [ Test.test "[[9,1],[1,9]]" <|
+            \_ ->
+                "[[9,1],[1,9]]"
+                    |> Day18.parseSnail
+                    |> Maybe.map Day18.magnitude
+                    |> Expect.equal (Just 129)
+        ]
+
+
+generalExampleInput : String
+generalExampleInput =
     """[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 [[[5,[2,8]],4],[5,[[9,9],0]]]
 [6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
@@ -362,22 +376,10 @@ part1Example : Test.Test
 part1Example =
     Test.test "Part 1 example" <|
         \_ ->
-            part1ExampleInput
+            generalExampleInput
                 |> Day18.flatParseInput
                 |> Maybe.andThen Day18.solvePart1
                 |> Expect.equal (Just 4140)
-
-
-magnitudeTests : Test.Test
-magnitudeTests =
-    Test.describe "Magnitude tests"
-        [ Test.test "[[9,1],[1,9]]" <|
-            \_ ->
-                "[[9,1],[1,9]]"
-                    |> Day18.parseSnail
-                    |> Maybe.map Day18.magnitude
-                    |> Expect.equal (Just 129)
-        ]
 
 
 part1Answer : Test.Test
@@ -388,6 +390,26 @@ part1Answer =
                 |> Day18.flatParseInput
                 |> Maybe.andThen Day18.solvePart1
                 |> Expect.equal (Just 3665)
+
+
+part2Example : Test.Test
+part2Example =
+    Test.test "Part 2 example" <|
+        \_ ->
+            generalExampleInput
+                |> Day18.flatParseInput
+                |> Maybe.andThen Day18.solvePart2
+                |> Expect.equal (Just 3993)
+
+
+part2Answer : Test.Test
+part2Answer =
+    Test.test "Part 2 answer" <|
+        \_ ->
+            day18Input
+                |> Day18.flatParseInput
+                |> Maybe.andThen Day18.solvePart2
+                |> Expect.equal (Just 4775)
 
 
 day18Input : String

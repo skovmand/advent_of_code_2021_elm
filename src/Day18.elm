@@ -1,4 +1,4 @@
-module Day18 exposing (Snail(..), Token, Type(..), explode, flatParseInput, flatParseSnail, magnitude, parseSnail, solvePart1, split, tokenListToString)
+module Day18 exposing (Snail(..), Token, Type(..), explode, flatParseInput, flatParseSnail, magnitude, parseSnail, solvePart1, solvePart2, split, tokenListToString)
 
 {-| Day 18: Snailfish
 <https://adventofcode.com/2021/day/18>
@@ -15,7 +15,7 @@ import Utilities exposing (maybeAll)
 
 
 type Snail
-    = RegularNumber Int
+    = Number Int
     | Pair Snail Snail
 
 
@@ -35,7 +35,7 @@ snailParser =
 
 snailRegularNumberParser : Parser.Parser Snail
 snailRegularNumberParser =
-    Parser.succeed RegularNumber
+    Parser.succeed Number
         |= Parser.int
 
 
@@ -61,7 +61,7 @@ magnitude snail =
         Pair a b ->
             3 * magnitude a + 2 * magnitude b
 
-        RegularNumber i ->
+        Number i ->
             i
 
 
@@ -355,3 +355,29 @@ splitListValue list acc =
 
                 _ ->
                     splitListValue rest (v :: acc)
+
+
+
+-----------
+-- PART 2
+-----------
+
+
+solvePart2 : List FlatSnail -> Maybe Int
+solvePart2 input =
+    input
+        |> List.concatMap (findSums input)
+        |> List.map tokenListToString
+        |> List.map parseSnail
+        |> maybeAll
+        |> Maybe.map (List.map magnitude)
+        |> Maybe.andThen List.maximum
+
+
+findSums : List FlatSnail -> FlatSnail -> List FlatSnail
+findSums listOfFlatSnails currentSnailFish =
+    let
+        filteredList =
+            List.filter (\fish -> fish /= currentSnailFish) listOfFlatSnails
+    in
+    List.map (\snailFish -> addSnailFishes currentSnailFish snailFish |> reduceSnailFish) filteredList
