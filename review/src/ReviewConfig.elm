@@ -25,7 +25,7 @@ config : List Rule
 config =
     [ NoUnused.CustomTypeConstructors.rule []
     , NoUnused.CustomTypeConstructorArgs.rule
-    , NoUnused.Dependencies.rule
+    , NoUnused.Dependencies.rule |> ignoreErrorsForFiles [ "elm.json" ]
     , NoUnused.Exports.rule |> ignoreErrorsForFiles [ "src/Utilities.elm" ]
     , NoUnused.Modules.rule
     , NoUnused.Parameters.rule
